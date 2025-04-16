@@ -1,0 +1,297 @@
+Глава №5. Итоговый тест
+
+
+Поздравляю! Мы продвинулись еще на одну главу вперед. Чтобы закрепить пройденный материал, давайте быстренько повторим теорию и выполним 2 практических задания.
+
+Оглавление:
+Теория
+Задание №1
+Задание №2
+
+Теория
+Операторы if позволяют выполнить код, основываясь на результате условия (истинно оно или нет). Если условие ложное, то выполняется 
+оператор else. Можно связывать несколько операторов if и else вместе.
+
+Оператор switch обеспечивает более удобный и быстрый способ использования условий/ветвлений в коде. Он отлично сочетается с перечислениями.
+
+Оператор goto позволяет переносить точку выполнения в программе из одного места в другое. Использовать этот оператор не рекомендуется.
+
+Цикл while выполняет определенный код до тех пор, пока условие истинно. Сначала обрабатывается условие, а затем выполняется код.
+
+Цикл do while — это тот же цикл while, только сначала выполняется код, а затем уже проверяется условие. Он отлично подходит для вывода 
+меню или других элементов, так как позволяет выполнить код хотя бы один раз.
+
+Циклы for наиболее используемые циклы. Они идеальны, когда нужно выполнить код определенное количество раз.
+
+Оператор break позволяет немедленно завершить выполнение оператора switch, циклов while, do while или for.
+
+Оператор continue позволяет немедленно перейти к следующей итерации цикла. Будьте осторожны при использовании этого оператора в связке 
+с циклами while или do while — не забывайте о возникновении проблемы с инкрементом счетчика цикла.
+
+И, наконец, рандомные числа позволяют получить разные результаты при выполнении одной и той же программы.
+
+
+Тест
+
+Задание №1
+В итоговом тесте главы №2 мы написали программу имитации мячика, падающего с башни. Так как тогда мы еще ничего не знали о циклах 
+и не умели их использовать, то время полета мячика составляло всего лишь 5 секунд.
+
+Измените программу, приведенную ниже, таким образом, чтобы мячик падал ровно то количество секунд, которое необходимо ему для достижения земли.
+
+constants.h:
+
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
+ 
+namespace myConstants
+{
+    const double gravity(9.8); 
+}
+#endif
+
+
+Основной файл:
+
+#include <iostream>
+#include "constants.h"
+ 
+// Получаем начальную высоту от пользователя и возвращаем её
+double getInitialHeight()
+{
+	std::cout << "Enter the initial height of the tower in meters: ";
+	double initialHeight;
+	std::cin >> initialHeight;
+	return initialHeight;
+}
+ 
+// Возвращаем расстояние от земли после "..." секунд падения
+double calculateHeight(double initialHeight, int seconds)
+{
+	// Используем формулу: [ s = u * t + (a * t^2) / 2 ], где u(начальная скорость) = 0
+	double distanceFallen = (myConstants::gravity * seconds * seconds) / 2;
+	double currentHeight = initialHeight - distanceFallen;
+ 
+	return currentHeight;
+}
+ 
+// Выводим высоту, на которой находится мячик после каждой секунды падения
+void printHeight(double height, int seconds)
+{
+	if (height > 0.0)
+	{
+		std::cout << "At " << seconds << " seconds, the ball is at height:\t" << height <<
+			" meters\n";
+	}
+	else
+		std::cout << "At " << seconds << " seconds, the ball is on the ground.\n";
+}
+ 
+void calculateAndPrintHeight(double initialHeight, int seconds)
+{
+	double height = calculateHeight(initialHeight, seconds);
+	printHeight(height, seconds);
+}
+ 
+int main()
+{
+	const double initialHeight = getInitialHeight();
+	double height;
+	height = calculateHeight(initialHeight, seconds);
+	for (int i=0;height>0.0;++i)
+	{
+		height = calculateHeight(initialHeight,i);
+		calculateAndPrintHeight(height,i);
+	}
+ 
+	return 0;
+}
+
+Ответ №1
+
+
+Задание №2
+Напишите программу-игру типа Hi-Lo:
+
+   Во-первых, ваша программа должна выбрать случайное целое число в диапазоне от 1 до 100.
+
+   Пользователю дается 7 попыток, чтобы угадать это число.
+
+   Если пользователь не угадал число, то программа должна подсказывать, была ли его догадка слишком большой или слишком маленькой.
+
+   Если пользователь угадал число, то программа должна сообщить, что всё верно — вы выиграли.
+
+   Если же у пользователя кончились попытки, и он не угадал число, то программа должна сообщить ему, что он проиграл и показать правильный результат.
+
+   В конце игры программа должна спросить у пользователя, не хочет ли он сыграть еще раз. Если пользователь не введет ни y, ни n (а что-то другое), то 
+программа должна спросить его еще раз.
+
+Пример результата выполнения вашей программы:
+
+Let's play a game. I'm thinking of a number. You have 7 tries to guess what it is.
+Guess #1: 64
+Your guess is too high.
+Guess #2: 32
+Your guess is too low.
+Guess #3: 54
+Your guess is too high.
+Guess #4: 51
+Correct! You win!
+Would you like to play again (y/n)? y
+Let's play a game. I'm thinking of a number. You have 7 tries to guess what it is.
+Guess #1: 64
+Your guess is too high.
+Guess #2: 32
+Your guess is too low.
+Guess #3: 54
+Your guess is too high.
+Guess #4: 51
+Your guess is too high.
+Guess #5: 36
+Your guess is too low.
+Guess #6: 45
+Your guess is too low.
+Guess #7: 48
+Your guess is too low.
+Sorry, you lose. The correct number was 49.
+Would you like to play again (y/n)? q
+Would you like to play again (y/n)? f
+Would you like to play again (y/n)? n
+Thank you for playing.
+
+Подсказки:
+
+   Используйте в качестве стартового числа во время генерации случайных чисел вызов функции time(0).
+
+   Пользователям Visual Studio: Из-за плохой реализации функции rand() (первое рандомное число не сильно отличается от стартового) 
+— вызовите rand() сразу после установки стартового числа, чтобы сбросить первый результат.
+
+   Используйте функцию getRandomNumber() из урока №71 для генерации случайного числа.
+
+   В функции, которая будет спрашивать у пользователя, не хочет ли он сыграть еще раз, используйте механизм обработки некорректного пользовательского ввода.
+
+
+
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+
+
+int getRandomNumber(int min, int max)
+{
+ 	static const double fraction=1.0/(static_cast<double>(RAND_MAX) + 1.0);
+	return static_cast<int>(rand() * fraction * (max-min+1) + min);
+}
+
+int main(){
+	const int nSprob{7};
+ 	srand(static_cast<unsigned int>(time(0))); 
+	int answer{getRandomNumber(1,100)};
+	int ntry;
+	char loop;
+	int i;
+	do
+	{
+		// pervoe soobschenie
+		std::cout << "Це гра Hi-Lo. Граємо! Я загадала число від 1 до 100. Ти повинен вгадувати, а я буду казати \"Моє число більше / менше\". В тебе " << nSprob << " спроб..\n";
+		
+		for (i=1;i<=nSprob;++i){ // cikl - sem popitok ugadat. esli ugadal - pozdravlenie і break */
+			std::cout << "Спроба № " << i << ". Вгадай число: ";
+			std::cin >> ntry;
+		        if(answer<ntry)
+                		std::cout << "Моє число менше\n";
+		        else if(answer>ntry)
+                		std::cout << "Моє число більше\n";
+		        else if(answer==ntry){
+                		std::cout << "Ти вгадав! Ура! Перемога!!!\n";
+	                	break;
+        		}			
+		}
+
+		if (i>nSprob) 
+			std::cout << "Ти програв. Правильна відповідь була " << answer << "\n";
+
+		std::cout << "Чи не хочеш зіграти ще раз? Якщо хочеш, натисни літеру 'y'\n";
+		std::cin >> loop;
+		if(loop!='y') 
+			break;
+	} while (true);
+	return 0;
+}
+
+
+
+Ответ №2
+
+#include <iostream>
+#include <cstdlib> // для функций srand() и rand()
+#include <ctime> // для функции time()
+ 
+// Генерируем случайное число между min и max.
+// Предполагается, что srand() уже вызывали
+int getRandomNumber(int min, int max)
+{
+    static const double fraction = 1.0 / (static_cast<double>(RAND_MAX) + 1.0); 
+    // Равномерно распределяем выбор случайного числа в диапазоне
+    return static_cast<int>(rand() * fraction * (max - min + 1) + min);
+}
+ 
+// Возвращаем true, если пользователь выиграл, false - если проиграл
+bool playGame(int guesses, int number)
+{
+    // Цикл работы с догадками пользователя 
+    for (int count = 1; count <= guesses; ++count)
+    {
+        std::cout << "Guess #" << count << ": ";
+        int guess;
+        std::cin >> guess;
+ 
+        if (guess > number)
+            std::cout << "Your guess is too high.\n";
+        else if (guess < number)
+            std::cout << "Your guess is too low.\n";
+        else // догадка == число
+            return true;
+    }
+ 
+    return false;
+}
+ 
+bool playAgain()
+{
+    // Продолжаем спрашивать у пользователя, хочет ли он сыграть еще раз до тех пор, пока он не нажмет 'y' или 'n'
+    char ch;
+    do
+    {
+        std::cout << "Would you like to play again (y/n)? ";
+        std::cin >> ch;
+    } while (ch != 'y' && ch != 'n');
+ 
+    return (ch == 'y');
+}
+ 
+int main()
+{
+    srand(static_cast<unsigned int>(time(0))); // в качестве стартового числа используем системные часы
+    rand(); // сбрасываем первый результат, так как функция rand() не особо хорошо рандомизирует первое случайное число в Visual Studio
+ 
+    const int guesses = 7; // у пользователя есть 7 попыток
+ 
+    do 
+    {
+        int number = getRandomNumber(1, 100); // число, которое пользователь должен угадать 
+ 
+        std::cout << "Let's play a game.  I'm thinking of a number.  You have " << guesses << " tries to guess what it is.\n";
+		
+        bool won = playGame(guesses, number);
+        if (won)
+            std::cout << "Correct!  You win!\n";
+        else
+            std::cout << "Sorry, you lose.  The correct number was " << number << "\n";
+ 
+    }
+    while (playAgain());
+ 
+    std::cout << "Thank you for playing.\n";
+    return 0;
+}

@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1744570231 source:/home/kmserg/studying/c++/ravesli/111-Gl-7-Itog-test/binarySearch/main.cpp
+	<iostream>
+	<cassert>
+

@@ -1,0 +1,51 @@
+dama CHERVI (serdechko)
+valet BUBNA (rombik)
+9 PIKI 
+8 TREF (kresta)
+8 CHERVI (serdechko)
+3 CHERVI (serdechko)
+4 BUBNA (rombik)
+korol BUBNA (rombik)
+9 CHERVI (serdechko)
+tuz TREF (kresta)
+10 PIKI 
+8 BUBNA (rombik)
+3 TREF (kresta)
+valet TREF (kresta)
+8 PIKI 
+4 CHERVI (serdechko)
+5 CHERVI (serdechko)
+tuz BUBNA (rombik)
+6 TREF (kresta)
+9 BUBNA (rombik)
+dama BUBNA (rombik)
+5 BUBNA (rombik)
+5 TREF (kresta)
+4 PIKI 4 TREF (kresta)
+10 CHERVI (serdechko)
+6 CHERVI (serdechko)
+10 TREF (kresta)
+2 PIKI 
+7 BUBNA (rombik)
+tuz CHERVI (serdechko)
+2 BUBNA (rombik)
+korol TREF (kresta)
+7 CHERVI (serdechko)
+valet CHERVI (serdechko)
+dama PIKI 
+dama TREF (kresta)
+6 BUBNA (rombik)
+3 PIKI 
+valet PIKI 
+5 PIKI 
+2 CHERVI (serdechko)
+tuz PIKI 
+10 BUBNA (rombik)
+3 BUBNA (rombik)
+7 TREF (kresta)
+9 TREF (kresta)
+korol PIKI 
+6 PIKI 
+2 TREF (kresta)
+7 PIKI 
+korol CHERVI (serdechko)
