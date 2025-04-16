@@ -1,0 +1,5 @@
+# include <iostream>
+int main(){
+    int i{2384};
+    std::cout << i%10 << "\n";
+}
