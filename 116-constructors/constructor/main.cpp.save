@@ -1,0 +1,54 @@
+#include <iostream>
+#include <strings>
+
+enum Colors{Red,Orange,Yellow,Green,Blue,Fiolet,Black,White};
+
+
+class Ball{
+	Colors m_color {Red};
+	double m_radius {20.0};
+public:
+	Ball(Colors col)	{
+		m_color=col;
+	}
+	Ball(double rad) {
+		m_radius=rad;
+	}
+	Ball(Colors col, double rad) {
+		m_color=col;
+		m_radius=rad;
+	}
+	Ball(){
+	}
+	void print(){
+        std::string name;
+        switch (m_color){
+            case Red,
+            case Orange,
+            case Yellow,
+            Green,
+            Blue,
+            Fiolet,
+            Black,
+            White
+        }
+		std::cout << "color: " << m_color << ", radius: " <<  m_radius << "\n";
+	}
+};
+
+int main()
+{
+Ball def;
+def.print();
+
+Ball black(Black);
+black.print();
+
+Ball thirty(30.0);
+ thirty.print();
+
+ Ball blackThirty(Black, 30.0);
+ blackThirty.print();
+
+ return 0;
+ }
