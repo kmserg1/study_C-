@@ -1,0 +1,330 @@
+Урок No118. Инициализация нестатических членов класса
+
+
+При написании класса с несколькими конструкторами, необходимость указывать значения по умолчанию всем членам в
+каждом конструкторе приведет к написанию лишнего кода.Если вы обновите значение по умолчанию какого-то одного
+члена, то вам придется лезть в каждый конструктор.
+Начиная с C++11, обычным переменным-членамкласса (те, которые не используют ключевое слово static) можно задать
+значение по умолчанию напрямую — использовать инициализацию:
+
+1 #include <iostream>
+2
+3 class Something
+4 {
+5 private:
+6 	double m_length = 3.5; // m_length имеет значение по умолчанию 3.5
+7 	double m_width = 3.5; // m_width имеет значение по умолчанию 3.5
+8
+9 public:
+10 	Something()
+11 	{
+12 		// Этот конструктор использует значения по умолчанию, приведенные выше, так как здесь эти значения не переопределяются
+13 	}
+14
+15 	void print()
+16 	{
+17 		std::cout << "length: " << m_length << " and width: " << m_width << '\n';
+18 	}
+19 };
+20
+21 int main()
+22 {
+23 	Something a; // a.m_length = 3.5, a.m_width = 3.5
+24 	a.print();
+25
+26 	return 0;
+27 }
+
+Результат выполнения программы:
+length: 3.5 and width: 3.5
+
+Таким образом, вы предоставляете значения по умолчанию вашим переменным-членам, которые будут использоваться
+вашими конструкторами, если сами конструкторы не предоставят эти значения (через списки инициализации членов).
+Однако конструкторы все еще определяют тип объектов, которые могут быть созданы, например:
+
+1 #include <iostream>
+2
+3 class Something
+4 {
+5 private:
+6 	double m_length = 3.5;
+7 	double m_width = 3.5;
+8
+9 public:
+10
+11 	// Обратите внимание, здесь нет конструктора по умолчанию
+12
+13 	Something(double length, double width)
+14 		: m_length(length), m_width(width)
+15 	{
+16 		// m_length и m_width инициализируются этим конструктором (значения по умолчанию, приведенные выше, не используются
+17 	}
+18
+19	 void print()
+20 	{
+21 		std::cout << "length: " << m_length << ", width: " << m_width << '\n';
+22 	}
+23
+24 };
+25
+26 int main()
+27 {
+28 	Something a; // не скомпилируется, так как требуется конструктор по умолчанию, даже если члены класса имеют значения по
+29
+30 	return 0;
+31 }
+
+Несмотря на то, что мы предоставили значения поумолчанию всем переменным-членам класса, конструктор по
+умолчанию предоставлен не был, поэтому мы не можем создать объект класса Something без	параметров.
+Если предоставлено значение по умолчанию, и конструктор инициализирует член через список инициализации членов, то
+приоритет будет у списка инициализации членов:
+
+1 #include <iostream>
+2
+3 class Something
+4 {
+5 private:
+6 	double m_length = 3.5;
+7 	double m_width = 3.5;
+8
+9 public:
+10
+11 	Something(double length, double width)
+12 		: m_length(length), m_width(width)
+13 	{
+14 		// m_length и m_width инициализируются конструктором (значения по умолчанию, приведенные выше, не используются)
+15 	}
+16
+17 	void print()
+18 	{
+19 		std::cout << "length: " << m_length << " and width: " << m_width << '\n';
+20 	}
+21
+22 };
+23
+24 int main()
+25 {
+26 Something a(4.5, 5.5);
+27 a.print();
+28
+29 return 0;
+30 }
+
+Результат выполнения программы:
+length: 4.5 and width: 5.5
+
+Правило: Используйте инициализацию нестатических членов для указания значений по умолчанию переменным-
+членам.
+
+
+Тест
+
+Задание No 1
+
+Добавьте в следующую программу инициализацию нестатических членов и список инициализации
+
+1 #include <string>
+2 #include <iostream>
+3
+4 class Thing
+5 {
+6 private:
+7 	std::string m_color;
+8 	double m_radius;
+9
+10 public:
+11 	// Конструктор по умолчанию без параметров
+12 	Thing()
+13 	{
+14 		m_color = "blue";
+15 		m_radius = 20.0;
+16 	}
+17
+18 	// Конструктор с параметром color (для radius предоставлено значение по умолчанию)
+19 	Thing(const std::string &color)
+20 	{
+21 		m_color = color;
+22 		m_radius = 20.0;
+23 	}
+24
+25 	// Конструктор с параметром radius (для color предоставлено значение по умолчанию)
+26 	Thing(double radius)
+27 	{
+28 		m_color = "blue";
+29 		m_radius = radius;
+30 	}
+31
+32 	// Конструктор с параметрами color и radius
+33 	Thing(const std::string &color, double radius)
+34 	{
+35 		m_color = color;
+36 		m_radius = radius;
+37 	}
+38
+39 	void print()
+40 	{
+41 		std::cout << "color: " << m_color << " and radius: " << m_radius << '\n';
+42 	}
+43 };
+44
+45 int main()
+46 {
+47 	Thing defl;
+48 	defl.print();
+49
+50 	Thing red("red");
+51 	red.print();
+52
+53 	Thing thirty(30.0);
+54 	thirty.print();
+55
+56 	Thing redThirty("red", 30.0);
+57 	redThirty.print();
+58
+59 	return 0;
+60 }
+
+Результат выполнения программы должен быть следующим:
+
+color: blue and radius: 20
+color: red and radius: 20
+color: blue and radius: 30
+color: red and radius: 30
+
+
+
+Мой вариант
+
+#include <string>                                                                        
+#include <iostream>                                                                      
+                                                                                         
+class Thing                                                                              
+{                                                                                        
+private:                                                                                 
+	std::string m_color{"blue"}; 
+	double m_radius {20.0};
+                                                                                         
+ public:                                                                                 
+ 	// Конструктор по умолчанию без параметров                                         
+ 	Thing()                                                                            
+ 	{                                                                                  
+ 	}                                                                                  
+
+ 	Thing(const std::string &color)
+		:m_color(color)
+ 	{                                                                                  
+
+ 	}                                                                                  
+
+ 	Thing(double radius)
+		:m_radius(radius)
+ 	{                                                                                  
+
+ 	}                                                                                  
+
+                                                                                         
+ 	// Конструктор с параметрами color и radius                                        
+ 	Thing(const std::string &color, double radius)
+		:m_color(color),m_radius(radius)
+ 	{                                                                                  
+ 	}                                                                                  
+                                                                                         
+ 	void print()                                                                       
+ 	{                                                                                  
+ 		std::cout << "color: " << m_color << " and radius: " << m_radius << '\n';  
+ 	}                                                                                  
+ };                                                                                      
+                                                                                         
+ int main()                                                                              
+ {                                                                                       
+ 	Thing defl;                                                                        
+ 	defl.print();                                                                      
+                                                                                         
+ 	Thing red("red");                                                                  
+ 	red.print();                                                                       
+                                                                                         
+ 	Thing thirty(30.0);                                                                
+ 	thirty.print();                                                                    
+                                                                                         
+ 	Thing redThirty("red", 30.0);                                                      
+ 	redThirty.print();                                                                 
+                                                                                         
+ 	return 0;                                                                          
+ }
+
+
+Ответ No1
+
+#include <iostream> 
+#include <string>
+ 
+class Thing
+{
+private:
+	std::string m_color = "blue";
+	double m_radius = 20.0;
+ 
+public:
+    // Конструктор по умолчанию без параметров (color и radius используют значения по умолчанию)
+	Thing()
+	{
+	}
+ 
+    // Конструктор с параметром color (для radius предоставлено значение по умолчанию)
+	Thing(const std::string &color):
+		m_color(color)
+	{
+	}
+ 
+    // Конструктор с параметром radius (для color предоставлено значение по умолчанию)
+	Thing(double radius):
+		m_radius(radius)
+	{
+	}
+ 
+    // Конструктор с параметрами color и radius
+	Thing(const std::string &color, double radius):
+		m_color(color), m_radius(radius)
+	{
+	}
+ 
+	void print()
+	{
+		std::cout << "color: " << m_color << " and radius: " << m_radius << '\n';
+	}
+};
+ 
+int main()
+{
+	Thing defl;
+	defl.print();
+ 
+	Thing red("red");
+	red.print();
+	
+	Thing thirty(30.0);
+	thirty.print();
+	
+	Thing redThirty("red", 30.0);
+	redThirty.print();
+ 
+	return 0;
+}
+
+
+
+Задание No2
+
+Зачем мы объявили пустой конструктор по умолчанию в программе из задания No 1? 
+Все же переменные-члены и так имеют значения по умолчанию.
+
+Мой вариант
+
+Если его не объявить, то его и не будет и строчка
+	Thing defl;
+выдаст ошибку
+
+
+Ответ No2
+
+Объект defl класса Thing будет искать конструктор по умолчанию. Если его не будет, то компилятор выдаст ошибку.
