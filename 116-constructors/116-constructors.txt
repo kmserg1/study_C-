@@ -370,11 +370,11 @@ a)Напишите класс Ball, который должен иметь сл�
 
 В классе Ball должныбыть следующие конструкторы:
  для установления значения только для m_color ;
- дляустановления значения только для m_radius;
- дляустановления значений и для m_radius, и для m_color;
+ для установления значения только для m_radius;
+ для установления значений и для m_radius, и для m_color;
  для установления значений, когда значения не предоставлены вообще.
 
-Не используйте параметры по умолчанию для конструкторов. Напишитееще одну функцию для
+Не используйте параметры по умолчанию для конструкторов. Напишите еще одну функцию для
 вывода цвета (m_color ) и радиуса ( m_radius ) шара (объекта класса Ball).
 
 Следующий кодфункции main():
@@ -396,20 +396,189 @@ a)Напишите класс Ball, который должен иметь сл�
 16 }
 
 Должен выдавать следующий результат:
-color:red, radius: 20
+color: red, radius: 20
 color: black, radius: 20
 color: red, radius:30
 color: black, radius: 30
 
+
+#include <iostream>
+#include <string>
+
+enum Colors{Red,Orange,Yellow,Green,Blue,Fiolet,Black,White};
+
+
+class Ball{
+	Colors m_color {Red};
+	double m_radius {20.0};
+public:
+	Ball(Colors col)	{
+		m_color=col;
+	}
+	Ball(double rad) {
+		m_radius=rad;
+	}
+	Ball(Colors col, double rad) {
+		m_color=col;
+		m_radius=rad;
+	}
+	Ball(){
+	}
+	void print(){
+        std::string name;
+        switch (m_color){
+            case Red:
+                name="Red";
+                break;
+            case Orange:
+                name="Orange";
+                break;
+            case Yellow:
+                name="Yellow";
+                break;
+            case Green:
+                name="Green";
+                break;
+            case Blue:
+                name="Blue";
+                break;
+            case Fiolet:
+                name="Fiolet";
+                break;
+            case Black:
+                name="Black";
+                break;
+            case White:
+                name="White";
+                break;
+            default:
+                name="ERROR!!!";
+                break;
+        }
+		std::cout << "color: " << name << ", radius: " <<  m_radius << "\n";
+	}
+};
+
 Ответ No 1.а)
+
+#include <iostream>
+#include <string>
+
+enum Colors{Red,Orange,Yellow,Green,Blue,Fiolet,Black,White};
+
+
+class Ball{
+	Colors m_color;
+	double m_radius;
+public:
+	Ball(Colors col=Red, double rad=20.0) {
+		m_color=col;
+		m_radius=rad;
+	}
+	Ball(){
+	}
+	void print(){
+        std::string name;
+        switch (m_color){
+            case Red:
+                name="Red";
+                break;
+            case Orange:
+                name="Orange";
+                break;
+            case Yellow:
+                name="Yellow";
+                break;
+            case Green:
+                name="Green";
+                break;
+            case Blue:
+                name="Blue";
+                break;
+            case Fiolet:
+                name="Fiolet";
+                break;
+            case Black:
+                name="Black";
+                break;
+            case White:
+                name="White";
+                break;
+            default:
+                name="ERROR!!!";
+                break;
+        }
+		std::cout << "color: " << name << ", radius: " <<  m_radius << "\n";
+	}
+};
+
+
+
 
 b) Теперь обновите ваш код из предыдущего задания с использованием конструкторов с
 параметрами по умолчанию. Постарайтесь использовать как можно меньше конструкторов.
+
+#include <iostream>
+#include <string>
+
+enum Colors{Red,Orange,Yellow,Green,Blue,Fiolet,Black,White};
+
+
+class Ball{
+	Colors m_color;
+	double m_radius;
+public:
+	Ball(Colors col=Red, double rad=20.0) {
+		m_color=col;
+		m_radius=rad;
+	}
+	Ball(double rad) {
+		m_color=Red;
+		m_radius=rad;
+	}
+
+	void print(){
+        std::string name;
+        switch (m_color){
+            case Red:
+                name="Red";
+                break;
+            case Orange:
+                name="Orange";
+                break;
+            case Yellow:
+                name="Yellow";
+                break;
+            case Green:
+                name="Green";
+                break;
+            case Blue:
+                name="Blue";
+                break;
+            case Fiolet:
+                name="Fiolet";
+                break;
+            case Black:
+                name="Black";
+                break;
+            case White:
+                name="White";
+                break;
+            default:
+                name="ERROR!!!";
+                break;
+        }
+		std::cout << "color: " << name << ", radius: " <<  m_radius << "\n";
+	}
+};
+
 
 Ответ No 1.b)
 
 
 Задание No 2
 Что произойдет, если не объявить конструктор по умолчанию?
+
+Будет создан пустой открытый конструктор
 
 Ответ No 2
