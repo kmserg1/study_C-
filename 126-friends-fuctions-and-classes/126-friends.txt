@@ -1,0 +1,816 @@
+Урок No 126. Дружественные функции и классы
+
+
+На этом уроке мы рассмотрим использование дружественных функций и дружественных классов в языке С++.
+
+Оглавление:
+1. Проблема
+2. Дружественные функции
+3. Дружественные функции и несколько классов
+4. Дружественные классы
+5. Дружественные методы
+6. Заключение
+7. Тест
+
+
+Проблема
+
+На предыдущих уроках мы говорили о том, что данные вашего класса должны быть private. Однако может возникнуть
+ситуация, когда у вас есть класс и функция, которая работает с этим классом, но которая не находится в его теле. Например,
+есть класс, в котором хранятся данные, и функция (или другой класс), которая выводит эти данные на экран. Хотя код класса и
+код функции вывода разделены (для упрощения поддержки кода), код функции вывода тесно связан с данными класса.
+Следовательно, сделав члены класса private, мы желаемого эффекта не добьёмся.
+
+В таких ситуациях есть два варианта:
+
+ Сделать открытыми методы класса и черезних функция будет взаимодействовать с классом. Однако здесь есть несколько
+нюансов. Во-первых, эти открытые методы нужно будет определить, на что потребуется время, и они будут загромождать
+интерфейс класса. Во-вторых, в классе нужно будет открыть методы, которые не всегда должны быть открытыми и
+предоставляющими доступ извне.
+
+ Использовать дружественные классы и дружественные функции, с помощью которых можно будет предоставить функции
+вывода доступ к закрытым данным класса. Это позволит функции вывода напрямую обращаться ко всем закрытым 
+переменным-членам и методам класса, сохраняя приэтом закрытый доступ к данным класса для всех остальных функций
+вне тела класса! На этом уроке мы рассмотрим, как это делается.
+
+
+Дружественные функции
+
+Дружественная функция — это функция, которая имеет доступ к закрытым членам класса, как если бы она сама была членом
+этого класса. Во всехдругих отношениях дружественная функция является обычной функцией. Ею может быть, как обычная
+функция, так и метод другого класса. Для объявления дружественной функции используется ключевое слово friend перед
+прототипом функции, которую выхотите сделать дружественной классу. Неважно, объявляете ли вы её в public-или в private-
+зоне класса. Например:
+
+1 class Anything
+2 {
+3 private:
+4 	int m_value;
+5 public:
+6 	Anything(){ m_value = 0; }
+7 	void add(int value) {m_value += value;}
+8
+9 	//Делаем функцию reset() дружественной классу Anything
+10 	friend void reset(Anything &anything);
+11 };
+13 // Функция reset() теперь является другом класса Anything
+12
+14 void reset(Anything &anything)
+15 {
+16 	// И мы имеем доступ к закрытым членам объектов класса Anything
+17 	anything.m_value =0;
+18 }
+19
+20 int main()
+21 {
+22 	Anything one;
+23 	one.add(4); // добавляем 4кm_value
+24 	reset(one); // сбрасываем m_valueв 0
+25
+26 	return 0;
+27 }
+
+Здесьмы объявили функцию reset(), которая принимает объект класса Anything и устанавливает m_value значение 0.
+Поскольку reset() не является членом класса Anything, то в обычной ситуации функция reset() не имела бы доступ к закрытым
+членам Anything. Однако, поскольку эта функция является дружественной классу Anything, она имеет доступ к закрытым членам
+Anything.
+Обратите внимание, мы должны передавать объект Anything в функцию reset()в качестве параметра. Это связано с тем, что
+функция reset() не является методом класса. Она не имеет указателя *this и, кроме как передачио бъекта, она не сможет
+взаимодействовать с классом.
+Еще один пример:
+
+1 class Something
+2 {
+3 private:
+4 	int m_value;
+5 public:
+6 	Something(intvalue) { m_value = value;}
+7 	friend bool isEqual(const Something &value1,const Something &value2);
+8 };
+9
+10 boolisEqual(const Something &value1,constSomething&value2)
+11 {
+12 	return (value1.m_value == value2.m_value);
+13 }
+
+Здесь мы объявили функцию isEqual() дружественной классу Something. Функция isEqual() принимает в качестве параметров
+два объекта класса Something. Поскольку isEqual() является другом класса Something, то функция имеет доступ ко всем
+закрытым членам объектов класса Something. Функция isEqual() сравнивает значения переменных-членов двух объектов и
+возвращает true, если они равны.
+
+
+Дружественные функции и несколько классов
+
+Функция может быть другом сразу для нескольких классов, например:
+
+1 #include <iostream>
+3 class Humidity;
+2
+4
+5 class Temperature
+6 {
+7 private:
+8 	int m_temp;
+9  public:
+10 	Temperature(int temp=0){ m_temp = temp; }
+11
+12 	friend void outWeather(constTemperature &temperature,const Humidity &humidity);
+13 };
+14
+15 class Humidity
+16 {
+17 private:
+18 	int m_humidity;
+19 public:
+20 	Humidity(int humidity=0) {m_humidity = humidity;}
+22 	friend void outWeather(const Temperature &temperature,const Humidity &humidity);
+21
+23 };
+24
+25 void outWeather(const Temperature &temperature, constHumidity &humidity)
+26 {
+27 	std::cout << "The temperature is " << temperature.m_temp <<
+28 	" and the humidity is "<< humidity.m_humidity<<'\n';
+29 }
+30
+31 int main()
+32 {
+34 	Humidity hum(11);
+33 	Temperature temp(15);
+35
+36 outWeather(temp, hum);
+37
+38 return 0;
+39 }
+
+Здесь есть две вещи, на которые следует обратить внимание.
+Во-первых, поскольку функция outWeather() является другом для обоих классов, то онаимеет доступ к закрытым 
+членам обоих классов. Во-вторых, обратите внимание на следующую строку в примере, приведенном выше
+
+1 class Humidity;
+
+Это прототип класса, который сообщает компилятору, что мы определим класс Humidity чуть позже. Без этой строчки
+компилятор выдал бы ошибку, что не знает, что такое Humidity при анализе прототипа дружественной функции outWeather()
+внутри класса Temperature. Прототипы классов выполняют ту же роль, что и прототипы функций: они сообщают компилятору
+об объектах, которые позднее будут определены, но которые сейчас нужно использовать. Однако, в отличие от функций,
+классы не имеют типа возврата или параметров, поэтому их прототипы предельно лаконичны: ключевое слово class + имя
+класса +; (например,class Anything; ).
+
+
+Дружественные классы
+
+Один класс может быть дружественным другому классу. Это откроет всем членам первого класса доступ к закрытым членам
+второго класса, например
+
+1 #include <iostream>
+2
+3 class Values
+4 {
+5 private:
+6 	int m_intValue;
+7 	double m_dValue;
+8 public:
+9 	Values(int intValue, double dValue)
+10 	{
+11 		m_intValue = intValue;
+12 		m_dValue = dValue
+13 	}
+14
+15 	// Делаем класс Display другом класса Values
+16 	friend class Display;
+17 };
+18
+19 class Display
+20 {
+21 private:
+22 	bool m_displayIntFirst;
+23
+24 public:
+25 	Display(bool displayIntFirst) {m_displayIntFirst = displayIntFirst; }
+26
+27 	void displayItem(Values &value)
+28 	{
+29 		if (m_displayIntFirst)
+30 			std::cout << value.m_intValue << " "<< value.m_dValue<<'\n';
+31 		else // или сначала выводим double
+32 			std::cout << value.m_dValue << " " << value.m_intValue<<'\n';
+33 	}
+34 };
+35
+36 int main()
+37 {
+38 	Values value(7,8.4);
+39 	Display display(false);
+40
+41 	display.displayItem(value);
+42
+43 	return 0;
+44 }
+
+Поскольку класс Display является другом класса Values, то любой из членов Display имеет доступ к private-членам Values.
+Результат выполнения программы:
+8.4 7
+
+Примечания о дружественных классах:
+
+ Во-первых, даже несмотря на то, что Display является другом Values, Display не имеет прямой доступ к указателю
+*this объектов Values.
+ Во-вторых, даже если Display является другом Values, это не означает, что Values также является другом Display. Если
+вы хотите сделать оба класса дружественными, то каждый из них должен указать в качестве друга противоположный
+класс.
+  Наконец, если класс A является другом B, а B является другом C, то это не означает, что A является другом C.
+Будьте внимательны при использовании дружественных функцийи классов, поскольку это может нарушать принципы
+инкапсуляции. Если детали одного класса изменятся, то детали класса-другатакже будут вынуждены измениться.
+Следовательно, ограничивайте количество и использование дружественных функций и классов.
+
+
+Дружественные методы
+
+Вместо того, чтобы делать дружественным целый класс, мы можем сделать дружественными только определенные методы
+класса. Ихо бъявление аналогично объявлениям обычных дружественных функций, за исключением имени метода с
+префиксом имяКласса:: в начале (например,Display::displayItem()).
+Переделаем наш предыдущий пример,ч тобы метод Display::displayItem() был дружественным классу Values. Мы могли бы
+сделать следующее:
+
+1 class Display; //предварительное объявление класса Display
+2
+3 class Values
+4 {
+5 private:
+6 	int m_intValue;
+7 	double m_dValue;
+8 public:
+9 	Values(int intValue, double dValue)
+10 	{
+11 		m_intValue = intValue;
+12 		m_dValue = dValue;
+13 	}
+14
+15 	// Делаем метод Display::displayItem() другом класса Values
+16 	friend void Display::displayItem(Values& value); // ошибка:Values не видит полного определения класса Display
+17 };
+18
+19 class Display
+20 {
+21 private:
+22 	bool m_displayIntFirst;
+23
+24 public:
+25 	Display(bool displayIntFirst) {m_displayIntFirst= displayIntFirst; }
+26
+27 	void displayItem(Values&value)
+28 	{
+29 		if (m_displayIntFirst)
+30 			std::cout << value.m_intValue << " "<< value.m_dValue<<'\n';
+31 		else// или выводим сначала double
+32 			std::cout << value.m_dValue << " " << value.m_intValue<<'\n';
+33 	}
+34 };
+
+Однако это не сработает. Чтобы сделать метод дружественным классу, компилятор должен увидеть полное определение
+класса, в котором дружественный метод определяется (а нетолько лишь его прототип). Поскольку компилятор, прочёсывая
+последовательно строчки кода не увидел полного определения класса Display, но успел увидеть прототип его метода, то он
+выдаст ошибку в строке определения этого метода дружественным классу Values (строка No 16).
+Можно попытаться переместить определение класса Display выше определения класса Values:
+
+1 class Display
+2 {
+3 private:
+4 	bool m_displayIntFirst;
+5
+6 public:
+7 	Display(bool displayIntFirst) {m_displayIntFirst= displayIntFirst; }
+8
+9 	void displayItem(Values &value)// ошибка: Компилятор не знает, чтотакое Values
+10 	{
+11 		if (m_displayIntFirst)
+12 			std::cout << value.m_intValue << " "<< value.m_dValue<<'\n';
+13 		else// иливыводимсначалаdouble
+14 			std::cout << value.m_dValue << " " << value.m_intValue<<'\n';
+15 	}
+16 };
+17
+18 class Values
+19 {
+20 private:
+21 	int m_intValue;
+22 	double m_dValue;
+23 public:
+24 	Values(intintValue, double dValue)
+25 	{
+26 		m_intValue = intValue;
+27 		m_dValue = dValue
+28 	}
+29
+30 	// Делаем метод Display::displayItem() другом класса Values
+31 	friend void Display::displayItem(Values& value);
+32 };
+
+Однако теперь мы имеем другую проблему. Посколькуметод Display::displayItem() использует ссылку на объекткласса Values в
+качестве параметра, а мы только что перенесли определение Display выше определения Values, то компилятор будет
+жаловаться,что он не знает, чтотакое Values. Получается замкнутый круг.
+К счастью,это также можно очень легко решить:
+ Во-первых, для класса Values используем предварительное объявление.
+ Во-вторых, переносим определение метода Display::displayItem() за пределы класса Display и размещаем его после
+полного определения класса Values.
+
+Вот как это будет выглядеть
+
+1 #include <iostream>
+2
+3 class Values; // предварительноеобъявлениеклассаValues
+4
+5 class Display
+6 {
+7 private:
+8 	bool m_displayIntFirst;
+9
+10 public:
+11 Display(bool displayIntFirst) {m_displayIntFirst= displayIntFirst; }
+12
+13 void displayItem(Values&value); // предварительное объявление, приведенное выше, требуется для этой строки
+14 };
+15
+16 class Values// полное определение класса Values
+17 {
+18 private:
+19 	int m_intValue;
+20 	double m_dValue;
+21 public:
+22 	Values(intintValue, double dValue)
+23 	{
+24 		m_intValue = intValue;
+25 		m_dValue = dValue
+26 	}
+27
+28 //Делаем метод Display::displayItem() другом класса Values
+29 friend void Display::displayItem(Values& value);
+30 };
+31
+32 // Теперь мы можем определить метод Display::displayItem(), которому требуется увидеть полное определение класса Values
+33 voidDisplay::displayItem(Values&value)
+34 {
+35 	if(m_displayIntFirst)
+36 		std::cout<< value.m_intValue<<" " << value.m_dValue << '\n';
+37 	else // или выводим сначала double
+38 		std::cout<< value.m_dValue<< "" <<value.m_intValue << '\n';
+39 }
+40
+41 int main()
+42 {
+43 Values value(7,8.4);
+44 Display display(false);
+45
+46 display.displayItem(value);
+47
+48 return 0;
+49 }
+
+Теперь всё будет работать правильно. Хотяэтоможет показаться несколько сложным, но этот «танец» с перемещением
+классов и методов нужен только потому, что мы пытаемся сделать всё в одном файле. Лучшим решением было бы поместить
+каждое определение класса в отдельный заголовочный файл с определениями методов в соответствующих файлах .cpp
+(детально об этом здесь). Таким образом, все определения классов стали бы видны сразу во всех файлах .cpp, и никакого
+«танца» с перемещениями не понадобилось бы!
+
+
+Заключение
+
+Дружественная функция/класс — это функция/класс, которая имеет доступ к закрытым членам другого класса, как если бы она
+сама была членом этого класса. Это позволяет функции/классу работать в тесном контакте с другим классом, не заставляя
+другой класс делать открытыми свои закрытые члены.
+
+
+Тест
+
+Точка в геометрии — это позиция в пространстве. Мы можем определить точку в 3D-пространстве как набор 
+координат x,y и z. Например, Point(0.0, 1.0, 2.0) будет точкой в координатном пространстве x = 0.0, y = 1.0 
+и z = 2.0 .
+Вектор в физике — это величина, которая имеет длину и направление (но не положение). Мы можем определить 
+вектор в 3D-пространстве через значения x, y и z, представляющие направление вектора вдоль осей x, y и z. 
+Например, Vector(1.0, 0.0, 0.0) будет вектором, представляющим направление только вдоль положительной оси x длиной 1.0.
+Вектор может применятся к точке для перемещения точки на новую позицию. Это делается путем добавления направления
+вектора к позиции точки. Например, Point(0.0, 1.0, 2.0) + Vector(0.0, 2.0, 0.0) даст точку (0.0, 3.0, 2.0) .
+Точки и векторы часто используются в компьютерной графике (точка для представления вершин фигуры, а векторы — для
+перемещения фигуры).
+
+Исходя из следующей программы:
+
+1 #include <iostream>
+2
+3 class Vector3D
+4 {
+5 private:
+6 	double m_x, m_y, m_z;
+7
+8 public:
+9 	Vector3D(double x = 0.0, double y= 0.0, double z= 0.0)
+10 		:m_x(x),m_y(y),m_z(z)
+11  	{
+12
+13  	}
+14
+15  	void print()
+16  	{
+17  	std::cout<< "Vector("<< m_x<<" , " << m_y<<", " << m_z<< ")\n";
+18  	}
+19 };
+20
+21 class Point3D
+22 {
+23 private:
+24  	double m_x, m_y, m_z;
+25 
+26 public:
+27 	Point3D(double x =0.0,double y = 0.0, double z = 0.0)
+28 		:m_x(x),m_y(y),m_z(z)
+29 	{
+30
+31 	}
+32
+33 	void print()
+34 	{
+35 		std::cout<< "Point(" << m_x << " ," << m_y << " , " << m_z <<")\n";
+36 	}
+37
+38 	void moveByVector(constVector3D &v)
+39 	{
+40 	/	/ Реализуйте эту функцию как дружественную классу Vector3D
+41 	}
+42 };
+43
+44 int main()
+45 {
+46 	Point3D p(3.0, 4.0, 5.0);
+47 	Vector3Dv(3.0, 3.0, -2.0);
+48
+49 	p.print();
+50 	p.moveByVector(v);
+51 	p.print();
+52
+53 	return 0;
+54 }
+
+
+a) Сделайте класс Point3D дружественным классу Vector3D и реализуйте метод moveByVector() в классе Point3D.
+
+-----------
+
+#include <iostream>                                                                
+
+class Vector3D                                                                     
+{                                                                                  
+private:                                                                           
+	double m_x, m_y, m_z;                                                        
+                                                                                   
+public:                                                                            
+	Vector3D(double x = 0.0, double y= 0.0, double z= 0.0)                       
+ 		:m_x(x),m_y(y),m_z(z)                                                
+  	{                                                                            
+                                                                                   
+  	}                                                                            
+                                                                                   
+  	void print()                                                                 
+  	{                                                                            
+  	std::cout<< "Vector("<< m_x<<" , " << m_y<<", " << m_z<< ")\n";              
+  	}
+	friend class Point3D;
+ };
+                                                                                   
+ class Point3D                                                                     
+ {                                                                                 
+ private:                                                                          
+  	double m_x, m_y, m_z;                                                        
+                                                                                   
+ public:                                                                           
+ 	Point3D(double x =0.0,double y = 0.0, double z = 0.0)                        
+ 		:m_x(x),m_y(y),m_z(z)
+ 	{                                                                            
+                                                                                   
+ 	}                                                                            
+                                                                                   
+ 	void print()                                                                 
+ 	{                                                                            
+ 		std::cout<< "Point(" << m_x << " ," << m_y << " , " << m_z <<")\n";  
+ 	}                                                                            
+                                                                                   
+ 	void moveByVector(const Vector3D &v)                                          
+ 	{
+ 		m_x+=v.m_x;
+		m_y+=v.m_y;
+		m_z+=v.m_z;
+ 	}                                                                            
+ };                                                                                
+                                                                                   
+ int main()                                                                        
+ {                                                                                 
+ 	Point3D p(3.0, 4.0, 5.0);                                                    
+ 	Vector3D v(1.0, 1.0, -2.0);                                                   
+                                                                                   
+ 	p.print();
+ 	v.print();
+ 	p.moveByVector(v);
+	std::cout<<"Moved  ";
+ 	p.print();                                                                   
+                                                                                   
+ 	return 0;                                                                    
+ }                                                                                 
+
+
+
+Ответ a)
+
+#include <iostream>
+ 
+class Vector3D
+{
+private:
+	double m_x, m_y, m_z;
+ 
+public:
+	Vector3D(double x = 0.0, double y = 0.0, double z = 0.0)
+		: m_x(x), m_y(y), m_z(z)
+	{
+ 
+	}
+ 
+	void print()
+	{
+		std::cout << "Vector(" << m_x << " , " << m_y << " , " << m_z << ")\n";
+	}
+ 
+	friend class Point3D; // Point3D теперь является другом класса Vector3D
+};
+ 
+ 
+class Point3D
+{
+private:
+	double m_x, m_y, m_z;
+ 
+public:
+	Point3D(double x = 0.0, double y = 0.0, double z = 0.0)
+		: m_x(x), m_y(y), m_z(z)
+	{
+ 
+	}
+ 
+	void print()
+	{
+		std::cout << "Point(" << m_x << " , " << m_y << " , " << m_z << ")\n";
+	}
+ 
+ 
+	void moveByVector(const Vector3D &v)
+	{
+		m_x += v.m_x;
+		m_y += v.m_y;
+		m_z += v.m_z;
+	}
+};
+ 
+ 
+int main()
+{
+	Point3D p(3.0, 4.0, 5.0);
+	Vector3D v(3.0, 3.0, -2.0);
+ 
+	p.print();
+	p.moveByVector(v);
+	p.print();
+ 
+	return 0;
+}
+
+
+
+
+
+b) Вместо того, чтобы класс Point3D был дружественным классу Vector3D, сделайте метод Point3D::moveByVector()
+дружественным классу Vector3D
+---------
+
+#include <iostream>                                                                
+
+class Vector3D;
+
+class Point3D
+ {                                                                                 
+ private:                                                                          
+  	double m_x, m_y, m_z;                                                        
+                                                                                   
+ public:                                                                           
+ 	Point3D(double x =0.0,double y = 0.0, double z = 0.0)                        
+ 		:m_x(x),m_y(y),m_z(z)
+ 	{                                                                            
+ 	}                                                                            
+                                                                                   
+ 	void print()                                                                 
+ 	{                                                                            
+ 		std::cout<< "Point(" << m_x << " ," << m_y << " , " << m_z <<")\n";  
+ 	}                                                                            
+                                                                                   
+ 	void moveByVector(const Vector3D &v);
+ };                                                                                
+
+
+class Vector3D
+{
+private:                                                                           
+	double m_x, m_y, m_z;                                                        
+                                                                                   
+public:                                                                            
+	Vector3D(double x = 0.0, double y= 0.0, double z= 0.0)                       
+ 		:m_x(x),m_y(y),m_z(z)                                                
+  	{                                                                            
+  	}                                                                            
+                                                                                   
+  	void print()                                                                 
+  	{                                                                            
+  	std::cout<< "Vector("<< m_x<<" , " << m_y<<", " << m_z<< ")\n";              
+  	}
+	friend void Point3D::moveByVector(const Vector3D &v);
+ };
+
+void Point3D::moveByVector(const Vector3D &v)                                          
+{
+	m_x+=v.m_x;
+	m_y+=v.m_y;
+	m_z+=v.m_z;
+}
+
+                                                                                   
+ int main()                                                                        
+ {                                                                                 
+ 	Point3D p(3.0, 4.0, 5.0);                                                    
+ 	Vector3D v(1.0, 1.0, -2.0);                                                   
+                                                                                   
+ 	p.print();
+ 	v.print();
+ 	p.moveByVector(v);
+	std::cout<<"Moved  ";
+ 	p.print();                                                                   
+                                                                                   
+ 	return 0;                                                                    
+ }
+-----------
+
+Ответ b)
+
+class Vector3D; // сначала говорим компилятору, что класс с именем Vector3D существует
+ 
+class Point3D
+{
+private:
+	double m_x, m_y, m_z;
+ 
+public:
+	Point3D(double x = 0.0, double y = 0.0, double z = 0.0)
+		: m_x(x), m_y(y), m_z(z)
+	{
+ 
+	}
+ 
+	void print()
+	{
+		std::cout << "Point(" << m_x << " , " << m_y << " , " << m_z << ")\n";
+	}
+ 
+	void moveByVector(const Vector3D &v); // чтобы мы могли использовать Vector3D здесь
+       // Примечание: Мы не можем определить эту функцию здесь, так как Vector3D еще не был определен (компилятор увидит только его предварительное объявление)
+};
+ 
+class Vector3D
+{
+private:
+	double m_x, m_y, m_z;
+ 
+public:
+	Vector3D(double x = 0.0, double y = 0.0, double z = 0.0)
+		: m_x(x), m_y(y), m_z(z)
+	{
+ 
+	}
+ 
+	void print()
+	{
+		std::cout << "Vector(" << m_x << " , " << m_y << " , " << m_z << ")\n";
+	}
+ 
+	friend void Point3D::moveByVector(const Vector3D &v); // Point3D::moveByVector() теперь является другом класса Vector3D
+};
+ 
+// Теперь, когда Vector3D был определен, мы можем определить функцию Point3D::moveByVector()
+void Point3D::moveByVector(const Vector3D &v)
+{
+	m_x += v.m_x;
+	m_y += v.m_y;
+	m_z += v.m_z;
+}
+ 
+int main()
+{
+	Point3D p(3.0, 4.0, 5.0);
+	Vector3D v(3.0, 3.0, -2.0);
+ 
+	p.print();
+	p.moveByVector(v);
+	p.print();
+ 
+	return 0;
+}
+
+
+
+c) Переделайте свой ответ из задания b, используя 5 отдельных файлов: Point3D.h, Point3D.cpp,Vector3D.h, Vector3D.cpp и
+main.cpp.
+------------
+
+
+Point3D.h
+---
+#ifndef POINT3D_H 
+#define POINT3D_H 
+
+class Point3D
+ {                                                                                 
+ private:                                                                          
+  	double m_x, m_y, m_z;                                                        
+                                                                                   
+ public:                                                                           
+ 	Point3D(double x =0.0,double y = 0.0, double z = 0.0)                        
+ 		:m_x(x),m_y(y),m_z(z)
+ 	{                                                                            
+ 	}                                                                            
+
+ 	void print();
+ 	void moveByVector(const Vector3D &v);
+ };                                                                                
+
+#endif
+
+
+Point3D.cpp
+---
+#include "Point3D"
+
+void Point3D::print()                                                                 
+{
+	std::cout<< "Point(" << m_x << " ," << m_y << " , " << m_z <<")\n";  
+}
+
+
+Vector3D.h
+---
+#ifndef VECTOR3D_H
+#define VECTOR3D_H
+
+class Vector3D
+{
+private:
+	double m_x, m_y, m_z;
+ 
+public:
+	Vector3D(double x = 0.0, double y = 0.0, double z = 0.0)
+		: m_x(x), m_y(y), m_z(z)
+	{
+	}
+ 
+	void print();
+	friend void Point3D::moveByVector(const Vector3D &v); 
+};
+
+#endif
+
+
+Vector3D.cpp 
+---
+#include "Vector3D"
+void print()
+{
+	std::cout << "Vector(" << m_x << " , " << m_y << " , " << m_z << ")\n";
+}
+
+
+main.cpp
+---
+#include <iostream>
+#include "Vector3D"
+#include "Point3D"
+
+ int main()                                                                        
+ {                                                                                 
+ 	Point3D p(3.0, 4.0, 5.0);                                                    
+ 	Vector3D v(1.0, 1.0, -2.0);                                                   
+                                                                                   
+ 	p.print();
+ 	v.print();
+ 	p.moveByVector(v);
+	std::cout<<"Moved  ";
+ 	p.print();                                                                   
+                                                                                   
+ 	return 0;                                                                    
+ }
+
+
+
+Ответ c)
