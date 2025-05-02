@@ -1,0 +1,1542 @@
+Глава No 8. Итоговый тест
+
+
+Вот мы и рассмотрели сердце этого туториала — объектно-ориентированное программирование в языке C++. Теперь пора
+закрепить полученные знания.
+
+Оглавление:
+1. Теория
+2. Задание No 1
+3. Задание No 2
+4. Задание No 3
+5. Задание No 4
+
+
+Теория
+
+Классы позволяют создавать собственные типы данных, которые объединяют данные и функции, работающие с этими
+данными. Данные и функции внутри класса называются членами. Доступ к членам класса осуществляется через оператор
+выбора членов . (или через оператор ->, если выполучаете доступ к элементу через указатель).
+
+Спецификаторы доступа позволяют указать, кто будет иметь доступ к членам класса. Доступ к открытым (public) членам
+класса имеют все. Доступ к закрытым (private) членам класса имеют только другие члены класса. О protected мы поговорим
+детально, когда будем рассматривать наследование в языке С++. По умолчанию все члены класса являются private, а все члены
+структуры — public.
+
+Инкапсуляция — это когда все переменные-члены вашего класса являются закрытыми, и доступ к ним напрямую невозможен.
+Это защищает ваш класс от неправильного/некорректного использования.
+
+Конструктор — это специальный тип метода класса, который позволяет инициализировать объекты класса. Конструктор,
+который не принимает никаких параметров (или имеет все параметры по умолчанию), называется конструктором по
+умолчанию. Конструктор по умолчанию выполняется, если пользователем не предоставлены значения для инициализации.
+Вы всегда должны иметь по крайней мере один конструктор для выполнения в каждом из своих классов.
+
+Список инициализации членов класса позволяет инициализировать переменные-члены из конструктора (вместо
+присваивания значений переменным-членам).
+В C++11 инициализация нестатических членов класса позволяет напрямую указывать значения по умолчанию для
+переменных-членов при их объявлении.
+До C++11 конструкторы не должны вызывать другие конструкторы (хоть это и скомпилируется, но будет работать не так, как вы
+ожидаете). В C++11 конструкторам разрешено вызывать другие конструкторы. Этот процесс называется делегированием
+конструкторов (или «цепочкой конструкторов»).
+
+Деструктор — это специальный тип метода класса, с помощью которого выполняется очистка класса. Именно в деструкторах
+следует выполнять освобождение динамически выделенной памяти.
+
+Все методы имеют скрытый указатель *this, который указывает на текущий объект класса (который используется в данный
+момент). В большинстве случаев вам не нужно напрямую обращаться к этому указателю.
+
+Хорошей практикой в программировании является использование заголовочных файлов при работе с классами, когда
+определения классов находятся в заголовочном файле с тем же именем, что у класса, ао пределения методов класса — в файле
+.cpp с тем же именем,что у класса.
+
+Методы класса могут (и должны) быть const, если они не изменяют данные класса. Константные объекты класса могут
+вызывать только константные методы класса.
+
+Статические переменные-члены класса являются общими для всех объектов класса. Доступ к ним можно получить как из
+любого объекта класса, так и непосредственно через оператор разрешения области видимости ::.
+
+Аналогично, статические методы класса — это методы, которые не имеют указателя *this. Они имеют доступ только к
+статическим переменным-членам класса.
+
+Дружественные функции — это внешние функции, которые имеют доступ к закрытым членам класса.
+Дружественные классы — это классы, в которых все методы являются дружественными функциями.
+
+Анонимные объекты создаются для обработки выражений или для передачи/возврата значений.
+
+В качестве вложенных типов в классах обычно используются перечисления, но также можно использовать и другие
+пользовательские типы данных (включая другие классы), если это необходимо.
+
+Тайминг кода осуществляется через библиотеку chrono и позволяет засечь время выполнения определенного фрагмента
+кода.
+
+
+Тест
+
+Задание No 1
+a) Напишите класс сименем Point. В классе Point должны быть две переменные-члены типа double: m_a и m_b со значениями
+по умолчанию 0.0. Напишите конструктор для этого класса и функцию вывода print().
+
+Следующая программа:
+1 #include <iostream>
+2
+3 int main()
+4 {
+5 Point first;
+6 Point second(2.0,5.0);
+7 first.print();
+8 second.print();
+9
+10 return 0;
+11 }
+
+Должна выдавать следующий результат:
+
+Point(0,0)
+Point(2,5)
+
+class Point{
+private:
+	double m_a, m_b;
+public:
+	Point( double a=0.0, double b=.0):m_a(a),m_b(b)
+	{
+	}
+	print(){
+		std::cout <<  "Point(" << m_a <<"," << m_b << ")\n";
+	}
+};
+
+Ответ No 1.а)
+
+b) Теперь добавим метод distanceTo(), который будет принимать второй объект класса Point в качестве параметра и будет
+вычислять расстояние между двумя объектами. Учитывая две точки (a1 , b1) и (a2, b2), расстояние между ними можно
+вычислить следующим образом: sqrt((a1- a2) *(a1 -a2) + (b1 - b2)* (b1- b2)). Функция sqrt() находится в
+заголовочном файле cmath.
+
+Следующая программа:
+1 int main()
+2 {
+3 	Point first;
+4 	Point second(2.0,5.0);
+5 	first.print();
+6 	second.print();
+7 	std::cout<< "Distance between two points: " <<first.distanceTo(second) <<'\n';
+8
+9 	return 0;
+10 }
+
+Должна выдавать следующий результат:
+Point(0,0)
+Point(2,5)
+Distance between two points: 5.38516
+---
+
+#include <iostream>
+#include <cmath>
+
+class Point{
+private:
+	double m_a, m_b;
+public:
+	Point(double a=0.0, double b=.0):m_a(a),m_b(b)
+	{
+	}
+
+	void print(){
+		std::cout <<  "Point(" << m_a <<"," << m_b << ")\n";
+	}
+
+	double distanceTo(Point p2) {
+		return sqrt((m_a - p2.m_a)*(m_a - p2.m_a) + (m_b - p2.m_b)*(m_b - p2.m_b));
+	}
+
+};
+
+//Должна выдавать следующий результат:
+//Point(0,0)
+//Point(2,5)
+//Distance between two points: 5.38516
+
+
+int main()
+{
+	Point first;
+	Point second(2.0,5.0);
+	first.print();
+	second.print();
+	std::cout<< "Distance between two points: " << first.distanceTo(second) <<'\n';
+
+	return 0;
+}
+
+Ответ No 1.b)
+
+c) Измените функцию distanceTo() из метода класса в дружественную функцию, которая будет принимать два объекта класса
+Point в качестве параметров. Переименуйте эту функцию на distanceFrom().
+
+Следующая программа:
+1 int main()
+2 {
+3 	Point first;
+4 	Point second(2.0,5.0);
+5 	first.print();
+6 	second.print();
+7 	std::cout<< "Distance between two points: " << distanceFrom(first, second) << '\n';
+9 	return 0;
+8
+10 }
+
+Должна выдавать следующий результат:
+Point(0,0)
+Point(2,5)
+Distance between two points: 5.38516
+
+---
+
+#include <iostream>
+#include <cmath>
+
+class Point{
+private:
+	double m_a, m_b;
+public:
+	Point(double a=0.0, double b=.0):m_a(a),m_b(b)
+	{
+	}
+
+	void print(){
+		std::cout <<  "Point(" << m_a <<"," << m_b << ")\n";
+	}
+
+	friend double distanceFrom(Point &p1,Point &p2);
+};
+
+double distanceFrom(Point &p1, Point &p2) {
+	return sqrt((p1.m_a - p2.m_a)*(p1.m_a - p2.m_a) + (p1.m_b - p2.m_b)*(p1.m_b - p2.m_b));
+}
+
+
+//Должна выдавать следующий результат:
+//Point(0,0)
+//Point(2,5)
+//Distance between two points: 5.38516
+
+
+int main()
+{
+	Point first;
+	Point second(2.0,5.0);
+	first.print();
+	second.print();
+	std::cout<< "Distance between two points: " << distanceFrom(first, second) << '\n';
+	return 0;
+
+}
+
+
+
+Ответ No 1.c)
+
+
+Задание No 2
+Напишите деструктор для следующего класса:
+
+1 #include<iostream>
+2
+3 class Welcome
+4 {
+5 private:
+6 	char *m_data;
+7
+8 public:
+9 	Welcome()
+10 	{
+11 		m_data = new char[14];
+12 		const char *init = "Hello, World!";
+13 		for (int i = 0; i < 14; ++i)
+14 			m_data[i]=init[i];
+15 	}
+16
+17 	~Welcome()
+18 	{
+19 		//Реализация деструктора
+20 	}
+21
+22 	void print() const
+23 	{
+24 		std::cout << m_data;
+25 	}
+26
+27 };
+28
+29 int main()
+30 {
+31 	Welcome hello;
+32 	hello.print();
+33
+34 	return 0;
+35 }
+
+---
+
+1 #include<iostream>
+2
+3 class Welcome
+4 {
+5 private:
+6 	char *m_data;
+7
+8 public:
+9 	Welcome()
+10 	{
+11 		m_data = new char[14];
+12 		const char *init = "Hello, World!";
+13 		for (int i = 0; i < 14; ++i)
+14 			m_data[i]=init[i];
+15 	}
+16
+17 	~Welcome()
+18 	{
+19 		delete[] m_data;
+20 	}
+21
+22 	void print() const
+23 	{
+24 		std::cout << m_data;
+25 	}
+26
+27 };
+28
+29 int main()
+30 {
+31 	Welcome hello;
+32 	hello.print();
+33
+34 	return 0;
+35 }
+
+
+
+
+Ответ No 2
+
+
+Задание No 3
+
+Давайте создадим генератор случайных монстров.
+
+a) Сначала создайте перечисление MonsterType со следующими типами монстров: Dragon, Goblin, Ogre, Orc, Skeleton,
+Troll, Vampire и Zombie + добавьте MAX_MONSTER_TYPES, чтобы иметь возможность подсчитать общее количество всех
+перечислителей.
+
+Ответ No 3.а)
+
+b) Теперь создайте класс Monster со следующими тремя атрибутами (переменными-членами): тип (MonsterType), имя
+(std::string) и количество здоровья (int).
+---
+#include <iostream>
+#include <string>
+
+enum MonsterType {
+	Dragon, 
+	Goblin, 
+	Ogre, 
+	Orc, 
+	Skeleton,
+	Troll, 
+	Vampire, 
+	Zombie, 
+	MAX_MONSTER_TYPES
+};
+
+class Monster {
+private:
+	MonsterType m_type;
+	std::string m_name;
+	int m_health;
+};
+
+int main(){return 0;}
+
+
+Ответ No 3.b)
+
+
+c) Перечисление MonsterType является специфичным для Monster, поэтому переместите его внутрь класса под спецификатор
+доступа public.
+
+Ответ No 3.c)
+
+d) Создайте конструктор, который позволит инициализировать все переменные-члены класса.
+Следующий фрагмент кода должен скомпилироваться без ошибок:
+
+1 int main()
+2 {
+3 	Monster jack(Monster::Orc, "Jack", 90);
+4
+5 	return 0;
+6 }
+
+Ответ No 3.d)
+
+Добавьте функцию getTypeString(), которая будет выполнять конвертацию, и функцию вывода print().
+
+e) Теперь нам нужно вывести информацию про нашего монстра. Для этого нужно конвертировать MonsterType в std::string.
+
+Следующая программа:
+
+1 int main()
+2 {
+3 	Monster jack(Monster::Orc, "Jack", 90);
+4 	jack.print();
+5
+6 	return 0;
+7 }
+
+Должна выдавать следующий результат:
+Jack is the orc that has 90 health points.
+
+---
+#include <iostream>
+#include <string>
+
+
+class Monster {
+
+public:
+	enum MonsterType {
+		DRAGON, 
+		GOBLIN, 
+		OGRE, 
+		ORC, 
+		SKELETON,
+		TROLL, 
+		VAMPIRE, 
+		ZOMBIE, 
+		MAX_MONSTER_TYPES
+	};
+
+private:
+	MonsterType m_type;
+	std::string m_name;
+	int m_health;
+
+public:
+	Monster(MonsterType type=TROLL, std::string name="vova", int health=3):
+		m_type{type}, m_name{name}, m_health{health}
+	{
+	}
+
+	std::string getTypeString(){
+		switch (m_type){
+			case DRAGON: return "dragon";
+			case GOBLIN: return "goblin";
+			case OGRE: return "ogre";
+			case ORC: return "orc";
+			case SKELETON: return "skeleton";
+			case TROLL: return "troll";
+			case VAMPIRE: return "vampire";
+			case ZOMBIE: return "zombie";
+			default: return "ERROR";
+		}
+	}
+
+	friend void print(Monster&);
+};
+
+
+void print(Monster &a){
+std::cout << a.m_name << " is the " << a.getTypeString() << " that has "<< a.m_health << " health points.\n";
+}
+
+
+int main()
+{
+	Monster jack(Monster::ORC, "Jack", 90);
+	Monster vova;
+	print(jack);
+	print(vova);
+	return 0;
+}
+
+
+
+Ответ No 3.e)
+
+#include <iostream>
+#include <string>
+ 
+class Monster
+{
+public:
+	enum MonsterType
+	{
+		Dragon,
+		Goblin,
+		Ogre,
+		Orc,
+		Skeleton,
+		Troll,
+		Vampire,
+		Zombie,
+		MAX_MONSTER_TYPES
+	};
+ 
+private:
+ 
+	MonsterType m_type;
+	std::string m_name;
+	int m_health;
+ 
+public:
+	Monster(MonsterType type, std::string name, int health)
+		: m_type(type), m_name(name), m_health(health)
+	{
+ 
+	}
+ 
+	std::string getTypeString() const
+	{
+		switch (m_type)
+		{
+		case Dragon: return "dragon";
+		case Goblin: return "goblin";
+		case Ogre: return "ogre";
+		case Orc: return "orc";
+		case Skeleton: return "skeleton";
+		case Troll: return "troll";
+		case Vampire: return "vampire";
+		case Zombie: return "zombie";
+		}
+	
+		return "Error!";
+	}
+ 
+	void print() const
+	{
+		std::cout << m_name << " is the " << getTypeString() << " that has " << m_health << " health points."<< '\n';
+	}
+};
+ 
+int main()
+{
+	Monster jack(Monster::Orc, "Jack", 90);
+	jack.print();
+ 
+    return 0;
+}
+
+
+
+f) Теперь мы уже можем создать сам генератор монстров. Для этого создайте статический класс MonsterGenerator и
+статический метод с именем generateMonster(), который будет возвращать случайного монстра. Пока что возвратом метода
+пускай будет анонимный объект: (Monster::Orc,"Jack", 90) .
+Следующая программа:
+
+1 int main()
+2 {
+3 	Monster m = MonsterGenerator::generateMonster();
+4 	m.print();
+5
+6 	return 0;
+7 }
+
+Должна выдавать следующий результат:
+Jack is the orc that has 90 health points.
+---
+#include <iostream>
+#include <string>
+#include <ctime> // для time()
+#include <cstdlib> // для rand() и srand()
+
+static class MonsterGenerator{
+
+public:
+	int getRandomNumber(int min, int max)
+	{
+		static const double fraction = 1.0 / (static_cast<double>(RAND_MAX)+ 1.0); // используем static, так как это значение нужно вычислить единожды
+		// Равномерно распределяем вычисление значения из нашего диапазона
+		return static_cast<int>(rand() * fraction * (max-min + 1) + min);
+	}
+
+	int randType(){
+		return getRandomNumber(0,MAX_MONSTER_TYPES);
+	}
+
+	std::string &randName(){
+		const int qtyNames{10};
+		std::string name[qtyNames] {"Name1","Name2","Name3","Name4","Name5","Name6","Name7","Name8","Name9","Name10"};
+		return name[getRandomNumber(0,qtyNames-1)];
+	}
+
+	int randHealth(){
+		const int qtyHealth{99};
+		return getRandomNumber(1,qtyNames);
+	}
+
+	Monster generateMonster(){
+		randMonster.m_type=randType();
+		randMonster.m_name=randName();
+		randMonster.m_health=randHealth();
+		return randMonster;
+	}
+	
+};
+
+
+ 
+int main()
+{
+	srand(static_cast<unsigned int>(time(0))); // используем системные часы в качестве стартового значения
+	rand(); // пользователям Visual Studio: делаем сброс первого случайного числа
+ 
+	Monster m = MonsterGenerator::generateMonster();
+	m.print();
+ 
+    return 0;
+}
+
+
+
+Ответ No 3.f)
+
+g) Теперь MonsterGenerator должен генерировать некоторые случайные атрибуты. Для этого нам понадобится генератор
+случайного числа. Воспользуйтесь следующей функцией:
+
+1 // Генерируем случайное числомежду min и max (включительно).
+2 // Предполагается, что srand() уже был вызван
+3 int getRandomNumber(int min, int max)
+4 {
+5 	static const double fraction = 1.0 / (static_cast<double>(RAND_MAX)+ 1.0); // используем static, так как это значение нужно вычислить единожды
+6 	// Равномерно распределяем вычисление значения из нашего диапазона
+7 	return static_cast<int>(rand() * fraction * (max-min + 1) + min);
+8 }
+
+Поскольку MonsterGenerator будет полагаться непосредственно на эту функцию, то поместите её внутрь класса в качестве
+статического метода.
+
+
+#include <iostream>
+#include <string>
+#include <ctime> // для time()
+#include <cstdlib> // для rand() и srand()
+
+
+class Monster {
+
+public:
+	enum MonsterType {
+		DRAGON, 
+		GOBLIN, 
+		OGRE, 
+		ORC, 
+		SKELETON,
+		TROLL, 
+		VAMPIRE, 
+		ZOMBIE, 
+		MAX_MONSTER_TYPES
+	};
+
+private:
+	MonsterType m_type;
+	std::string m_name;
+	int m_health;
+
+public:
+	Monster(MonsterType type=TROLL, std::string name="vova", int health=3):
+		m_type{type}, m_name{name}, m_health{health}
+	{
+	}
+
+	std::string getTypeString(){
+		switch (m_type){
+			case DRAGON: return "dragon";
+			case GOBLIN: return "goblin";
+			case OGRE: return "ogre";
+			case ORC: return "orc";
+			case SKELETON: return "skeleton";
+			case TROLL: return "troll";
+			case VAMPIRE: return "vampire";
+			case ZOMBIE: return "zombie";
+			default: return "ERROR";
+		}
+	}
+
+	friend void print(Monster&);
+};
+
+
+void print(Monster &a){
+std::cout << a.m_name << " is the " << a.getTypeString() << " that has "<< a.m_health << " health points.\n";
+}
+
+
+class MonsterGenerator{
+private:
+
+
+public:
+
+	static int getRandomNumber(int min, int max)
+	{
+		static const double fraction = 1.0 / (static_cast<double>(RAND_MAX)+ 1.0); // используем static, так как это значение нужно вычислить единожды
+		// Равномерно распределяем вычисление значения из нашего диапазона
+		return static_cast<int>(rand() * fraction * (max-min + 1) + min);
+	}
+
+	Monster::MonsterType randType(){
+		return static_cast<Monster::MonsterType>(getRandomNumber(0,Monster::MAX_MONSTER_TYPES-1));
+	}
+
+	static std::string randName(){
+		static const int qtyNames{10};
+		static std::string name[qtyNames] {"Name1","Name2","Name3","Name4","Name5","Name6","Name7","Name8","Name9","Name10"};
+		return name[getRandomNumber(0,qtyNames-1)];
+	}
+
+	int randHealth(){
+		const int qtyHealth{99};
+		return getRandomNumber(1,qtyHealth);
+	}
+
+	static Monster generateMonster(){
+		int t {static_cast<Monster::MonsterType>(randType())};
+		std::string n {randName()};
+		int h {randHealth()};
+		Monster randMonster(static_cast<Monster::MonsterType>(t), n, h);
+		return randMonster;
+	}
+	
+};
+
+
+ 
+int main()
+{
+	srand(static_cast<unsigned int>(time(0))); // используем системные часы в качестве стартового значения
+	rand(); // пользователям Visual Studio: делаем сброс первого случайного числа
+	MonsterGenerator mG;
+	Monster m = mG.generateMonster();
+	print(m);
+ 
+    return 0;
+}
+
+
+
+Ответ No 3.g)
+
+#include <iostream> 
+#include <ctime> // для time()
+#include <cstdlib> // для rand() и srand()
+#include <string>
+ 
+class Monster
+{
+public:
+	enum MonsterType
+	{
+		Dragon,
+		Goblin,
+		Ogre,
+		Orc,
+		Skeleton,
+		Troll,
+		Vampire,
+		Zombie,
+		MAX_MONSTER_TYPES
+	};
+ 
+private:
+ 
+	MonsterType m_type;
+	std::string m_name;
+	int m_health;
+ 
+public:
+	Monster(MonsterType type, std::string name, int health)
+		: m_type(type), m_name(name), m_health(health)
+	{
+ 
+	}
+ 
+	std::string getTypeString() const
+	{
+		switch (m_type)
+		{
+		case Dragon: return "dragon";
+		case Goblin: return "goblin";
+		case Ogre: return "ogre";
+		case Orc: return "orc";
+		case Skeleton: return "skeleton";
+		case Troll: return "troll";
+		case Vampire: return "vampire";
+		case Zombie: return "zombie";
+		}
+	
+		return "Error!";
+	}
+ 
+	void print() const
+	{
+		std::cout << m_name << " is the " << getTypeString() << " that has " << m_health << " health points." << '\n';
+	}
+};
+ 
+class MonsterGenerator
+{
+public:
+	// Генерируем случайное число между min и max (включительно).
+	// Предполагается, что srand() уже был вызван
+	static int getRandomNumber(int min, int max)
+	{
+		static const double fraction = 1.0 / (static_cast<double>(RAND_MAX) + 1.0); // используем static, так как это значение нужно вычислить единожды
+		// Равномерно распределяем вычисление значения из нашего диапазона
+		return static_cast<int>(rand() * fraction * (max - min + 1) + min);
+	}
+ 
+	static Monster generateMonster()
+	{
+		Monster::MonsterType type = static_cast<Monster::MonsterType>(getRandomNumber(0, Monster::MAX_MONSTER_TYPES - 1));
+		int health = getRandomNumber(1, 100);
+ 
+		static std::string s_names[6]{ "John", "Brad", "Alex", "Thor", "Hulk", "Asnee" }; 
+		return Monster(type, s_names[getRandomNumber(0, 5)], health);
+	}
+};
+ 
+int main()
+{
+	srand(static_cast<unsigned int>(time(0))); // используем системные часы в качестве стартового значения
+	rand(); // пользователям Visual Studio: делаем сброс первого случайного числа
+ 
+	Monster m = MonsterGenerator::generateMonster();
+	m.print();
+ 
+    return 0;
+}
+
+
+
+h) Теперь измените функцию generateMonster() для генерации случайного MonsterType (между 0 и
+Monster::MAX_MONSTER_TYPES-1) и случайного количества здоровья (от 1 до 100). Это должно быть просто. После того, как вы
+это сделаете, определите один статический фиксированный массив s_names размером 6 элементов внутри функции
+generateMonster() и инициализируйте его 6-ю любыми именами на вашвыбор. Добавьте возможность выбора случайного
+имени из этого массива.
+
+Следующий фрагмент должен скомпилироваться без ошибок:
+
+1 #include <ctime> // для time()
+2 #include <cstdlib> // для rand() и srand()
+3
+4 int main()
+5 {
+6 	srand(static_cast<unsigned int>(time(0))); //используем системныечасы вкачестве стартового значения
+7 	rand(); // пользователям Visual Studio: делаем сброс первого случайного числа
+8
+9 	Monster m=MonsterGenerator::generateMonster();
+10 	m.print();
+11
+12 	return 0;
+13 }
+
+Ответ No 3.h)
+
+i) Почему мы объявили массив s_names статическим?
+
+ОтветNo3.i)
+
+
+Задание No 4
+
+Настало время для нашего и вашего любимого задания «Blackjack». На этот раз мы перепишем игру «Blackjack», которую
+написали ранее в итоговом тесте главы No 6, но уже с использованием классов! Вот полный код без классов:
+
+1 #include <iostream>
+2 #include <array>
+3 #include <ctime>// для time()
+4 #include <cstdlib>// для rand() и srand()
+5
+6 enum CardSuit
+7 {
+8 SUIT_CLUB,
+9 SUIT_DIAMOND,
+10 SUIT_HEART,
+11 SUIT_SPADE,
+12 MAX_SUITS
+13 };
+14
+15 enum CardRank
+16 {
+17 	RANK_2,
+19 	RANK_4,
+18 	RANK_3,
+20 	RANK_5,
+21 	RANK_6,
+22 	RANK_7,
+23 	RANK_8,
+24 	RANK_9,
+25 	RANK_10,
+26 	RANK_JACK,
+27 	RANK_QUEEN,
+28 	RANK_KING,
+29 	RANK_ACE,
+30 	MAX_RANKS
+31 };
+32
+33 struct Card
+34 {
+35 	CardRank rank;
+36 	CardSuit suit;
+37 };
+38
+39 void printCard(constCard &card)
+40 {
+41 	switch (card.rank)
+42 	{
+43 		case RANK_2: std::cout<< '2'; break;
+44 		case RANK_3: std::cout<< '3'; break;
+45 		case RANK_4: std::cout<< '4'; break;
+46 		case RANK_5: std::cout<< '5'; break;
+47 		case RANK_6: std::cout<< '6'; break;
+48 		case RANK_7: std::cout<< '7'; break;
+49 		case RANK_8: std::cout<< '8'; break;
+50 		case RANK_9: std::cout<< '9'; break;
+51 		case RANK_10: std::cout<< 'T'; break;
+52 		caseRANK_JACK: std::cout<< 'J'; break;
+53 		case RANK_QUEEN: std::cout<< 'Q'; break;
+54 		caseRANK_KING: std::cout<< 'K'; break;
+55 		caseRANK_ACE: std::cout<< 'A'; break;
+56 	}
+57
+58 	switch (card.suit)
+59 	{
+60 		case SUIT_CLUB: std::cout << 'C'; break;
+62 		case SUIT_HEART: std::cout<< 'H'; break;
+61 		case SUIT_DIAMOND: std::cout<< 'D'; break;
+63 		case SUIT_SPADE: std::cout<< 'S'; break;
+64 	}
+65 }
+66
+67 void printDeck(conststd::array<Card,52>deck)
+68 {
+69 	for(constauto &card : deck)
+70 	{
+71 		printCard(card);
+72 		std::cout <<'';
+73 	}
+74
+75 	std::cout <<'\n';
+76 }
+77
+78 void swapCard(Card&a,Card &b)
+79 {
+80 	Card temp = a;
+81 	a=b;
+82 	b=temp;
+83 }
+85 // Генерируем случайное число между min и max (включительно).
+84
+86 // Предполагается, что srand() уже был вызван
+87 int getRandomNumber(int min, int max)
+88 {
+89 	static constdouble fraction = 1.0 / (static_cast<double>(RAND_MAX)+1.0); // используем static, так как это значение нужно вычислить единожды
+90 	// Равномерно распределяем вычисление значения из нашего диапазон
+91 	return static_cast<int>(rand() * fraction * (max-min+ 1)+min);
+92 }
+93
+94 void shuffleDeck(std::array<Card,52>&deck)
+96 // Перебираем каждуюкарту в колоде
+95 {
+97 	for(int index=0; index<52;++index)
+98 	{
+99 		// Выбираем любую случайную карту
+100 		int swapIndex = getRandomNumber(0, 51);
+101 		// Меняем местами с нашей текущей картой
+102 		swapCard(deck[index],deck[swapIndex]);
+103 	}
+104 }
+105
+106 int getCardValue(constCard &card)
+107 {
+108 	switch (card.rank)
+109 	{
+110 		case RANK_2: return 2;
+111 		case RANK_3: return 3;
+112		case RANK_4: return 4;
+113 		case RANK_5: return 5;
+114 		case RANK_6: return 6;
+115 		case RANK_7: return 7;
+116 		case RANK_8: return 8;
+117 		case RANK_9: return 9;
+118		case RANK_10: return 10;
+119 		case RANK_JACK: return 10;
+120 		case RANK_QUEEN: return 10;
+121		case RANK_KING: return 10;
+122 		case RANK_ACE: return 11;
+123 	}
+124
+125 	return 0;
+126 }
+127
+128 char getPlayerChoice()
+129 {
+130 	std::cout <<"(h) tohit,or (s) tostand:";
+131 	char choice;
+132 	do
+133 	{
+134 		std::cin>> choice;
+135	 } while (choice !='h' && choice !='s');
+137 return choice;
+136
+138 }
+139
+140 bool playBlackjack(conststd::array<Card,52> deck
+141 {
+142 	const Card *cardPtr = &deck[0];
+143
+144 	int playerTotal = 0;
+145 	int dealerTotal = 0;
+146
+147 	// Дилер получает одну карту
+148 	dealerTotal +=getCardValue(*cardPtr++);
+149 	std::cout <<"The dealer isshowing: " << dealerTotal << '\n'
+150
+151 	// Игрокполучает две карты
+152 	playerTotal +=getCardValue(*cardPtr++);
+153 	playerTotal +=getCardValue(*cardPtr++);
+154
+155 	// Игрок начинает
+156 	while(1)
+157 	{
+158 		std::cout <<"You have:"<< playerTotal<< '\n'
+159 		charchoice = getPlayerChoice();
+160 		if (choice== 's')
+161 			break;
+162
+163 		playerTotal +=getCardValue(*cardPtr++);
+164
+165 		// Смотрим, не проиграл ли игрок
+166 		if (playerTotal > 21)
+167 			return false;
+168 	}
+169
+170 	// Если игрок не проиграл (у него не больше 21 очка), тогда дилер получает карты до тех пор, пока у него в сумме будет не меньше 17 очков
+171 	while(dealerTotal<17)
+172 	{
+173 		dealerTotal +=getCardValue(*cardPtr++);
+174 		std::cout << "The dealer now has:" << dealerTotal << '\n';
+175 	}
+176
+177 	// Если у дилера больше 21, то он проиграл, а игрок выиграл
+178 	if (dealerTotal > 21)
+179 		return true;
+180
+181 	return (playerTotal > dealerTotal);
+182 }
+183
+184 int main()
+185 {
+186 	srand(static_cast<unsigned int>(time(0)));// используем системные часы в качестве стартового значения
+187 	rand(); //пользователям VisualStudio: делаем сброс первого случайного числа
+188
+189 	std::array<Card,52>deck;
+190
+191 	// Конечно, можно было бы инициализировать каждую карту отдельно, но зачем? Ведь есть циклы!
+192 	int card=0;
+193 	for(intsuit = 0;suit <MAX_SUITS; ++suit)
+194     	for(intrank = 0;rank <MAX_RANKS; ++rank)
+195 		{
+196 			deck[card].suit = static_cast<CardSuit>(suit);
+197 			deck[card].rank = static_cast<CardRank>(rank);
+198 			++card;
+199 		}
+200
+201 	shuffleDeck(deck);
+202
+203 	if (playBlackjack(deck))
+204 		std::cout <<"You win!\n";
+205 	else
+206 		std::cout <<"You lose!\n";
+207
+208 	return 0;
+209 }
+
+Нехило, правда? С чегоже начинать?
+Для начала нам нужна стратегия. Программа «Blackjack» состоит из 4 частей:
+
+ Логика работы с картами.
+ Логика работы с колодами карт.
+ Логика раздачи карт из колоды.
+ Логика игры.
+
+Наша стратегия заключается в том, чтобы работать над каждой из этих частей индивидуально. Таким образом, вместо
+конвертации целой программы за один присест, мы сделаем это спокойно за 4 шага.
+
+Скопируйте вышеприведенный код в вашу IDE, а затем закомментируйте всё, кроме строк, содержащих #include.
+
+a) Начнем с того, что переделаем Card из структуры в класс. Хорошей новостью является то, что класс Card очень похож на
+класс Monster из предыдущего задания. Алгоритм действий следующий:
+ Во-первых, переместите перечисления CardSuit и CardRank внутрь класса Card под спецификатор доступа public (они
+неотъемлемо связаны с Card, поэтому должны находиться внутри класса).
+ Во-вторых, создайте закрытые переменные-члены m_rank и m_suit для хранения значений CardRank и CardSuit.
+ В-третьих, создайте открытый конструктор класса Card с инициализацией карт (переменных-членов класса). Укажите
+параметры по умолчанию для конструктора (используйте MAX_RANKS и MAX_SUITS).
+ Наконец, переместите функции printCard() и getCardValue() внутрь класса под спецификатор доступа public (не забудьте
+сделать их const!).
+
+Примечание: При использовании std::array (или std::vector), где элементами являются объекты класса, класс должен иметь
+конструктор по умолчанию, чтобы элементы могли быть инициализированы разумными значениями по умолчанию. Если
+вы этого не сделаете, топ олучите ошибку попытки ссылаться на удаленную функцию.
+Следующий фрагмент кода должен скомпилироваться без ошибок:
+
+1 #include <iostream>
+2
+3 int main()
+4 {
+5 	const Card cardQueenHearts(Card::RANK_QUEEN, Card::SUIT_HEART);
+6 	cardQueenHearts.printCard();
+7 	std::cout << " has the value" << cardQueenHearts.getCardValue() << '\n';
+8
+9 	return 0;
+10 }
+
+Ответ No 4.а)
+
+b) Хорошо, теперь давайте работать над классом Deck:
+
+ Во-первых,в Deck должно быть 52 карты, поэтому создайте private-член m_deck, который будет фиксированным
+массивом с 52-мя элементами (используйте std::array)
+
+ Во-вторых, создайте конструктор, который не принимает никаких параметров и инициализирует каждый элемент
+массива m_deck случайной картой (используйте код изфункции main() с циклами for из вышеприведенного примера, где
+присутствует полный код). Внутри циклов создайте анонимный объект Card и присваивайте его каждому элементу массива
+m_deck.
+
+ В-третьих, переместите функцию printDeck() в класс Deck под спецификатор доступа public (не забудьте о const).
+
+ В-четвертых, переместите функции getRandomNumber() и swapCard() в класс Deck в качестве закрытых статических
+членов.
+
+ В-пятых, переместите функцию shuffleDeck() в класс в качестве открытого члена.
+
+Подсказка: Самой сложной частью здесь является инициализация колоды карт с использованием модифицированного
+кода из исходной функции main(). В следующей строке показывается, как это сделать:
+
+1 m_deck[card] = Card(static_cast<Card::CardRank>(rank),static_cast<Card::CardSuit>(suit));
+
+Следующий фрагмент должен cкомпилироваться без ошибок:
+1 #include<iostream>
+2 #include<ctime> //для time()
+3 #include<cstdlib> //для rand() и srand()
+4
+5 int main()
+6 {
+7 	srand(static_cast<unsigned int>(time(0))); // используем системные часы в качестве стартового значения
+8 	rand(); // пользователям Visual Studio: делаем сброс первого случайного числа
+9
+10 	Deck deck;
+11 	deck.printDeck();
+12 	deck.shuffleDeck();
+13 	deck.printDeck();
+14
+15 	return 0;
+16 }
+
+-------------------
+
+#include <iostream>
+#include <array>
+#include <ctime>// для time()
+#include <cstdlib>// для rand() и srand()
+
+class Card{
+public:
+	enum CardSuit
+	{
+		SUIT_CLUB,
+		SUIT_DIAMOND,
+		SUIT_HEART,
+		SUIT_SPADE,
+		MAX_SUITS
+	};
+
+	enum CardRank
+	{
+		RANK_2,
+		RANK_3,
+		RANK_4,
+		RANK_5,
+		RANK_6,
+		RANK_7,
+		RANK_8,
+		RANK_9,
+		RANK_10,
+		RANK_JACK,
+		RANK_QUEEN,
+		RANK_KING,
+		RANK_ACE,
+		MAX_RANKS
+	};
+private:
+	CardRank m_ranc;
+	CardSuit m_suit;
+
+public:
+	Card(CardRank r=static_cast<CardRank>(MAX_RANKS-1), CardSuit s=static_cast<CardSuit>(MAX_SUITS-1)):
+		m_ranc{r},m_suit{s}
+	{
+	}
+
+	void printCard() const
+	{
+		std::cout << "--- printCard ---\n";
+		std::cout << "m_ranc=" << m_ranc << ' ';
+		switch (m_ranc)
+		{
+			case RANK_2: std::cout<< '2'; break;
+			case RANK_3: std::cout<< '3'; break;
+			case RANK_4: std::cout<< '4'; break;
+			case RANK_5: std::cout<< '5'; break;
+			case RANK_6: std::cout<< '6'; break;
+			case RANK_7: std::cout<< '7'; break;
+			case RANK_8: std::cout<< '8'; break;
+			case RANK_9: std::cout<< '9'; break;
+			case RANK_10: std::cout<< 'T'; break;
+			case RANK_JACK: std::cout<< 'J'; break;
+			case RANK_QUEEN: std::cout<< 'Q'; break;
+			case RANK_KING: std::cout<< 'K'; break;
+			case RANK_ACE: std::cout<< 'A'; break;
+		}
+		std::cout << '\t';
+		std::cout << "m_suit=" << m_suit << ' ';
+		switch (m_suit)
+		{
+			case SUIT_CLUB: std::cout << 'C'; break;
+			case SUIT_HEART: std::cout<< 'H'; break;
+			case SUIT_DIAMOND: std::cout<< 'D'; break;
+			case SUIT_SPADE: std::cout<< 'S'; break;
+		}
+		std::cout << '\n';
+	}
+
+	int getCardValue() const
+	{
+ 		switch (m_ranc)
+	 	{
+ 			case RANK_2: return 2;
+ 			case RANK_3: return 3;
+			case RANK_4: return 4;
+ 			case RANK_5: return 5;
+ 			case RANK_6: return 6;
+	 		case RANK_7: return 7;
+ 			case RANK_8: return 8;
+ 			case RANK_9: return 9;
+			case RANK_10: return 10;
+ 			case RANK_JACK: return 10;
+ 			case RANK_QUEEN: return 10;
+			case RANK_KING: return 10;
+ 			case RANK_ACE: return 11;
+	 	}
+
+ 	return 0;
+	}
+
+};
+
+class Deck{
+private:
+	std::array<Card,52> m_deck;
+
+	int getRandomNumber(int min, int max)
+	{
+		static const double fraction = 1.0 / (static_cast<double>(RAND_MAX)+1.0); // используем static, так как это значение нужно вычислить единожды
+		// Равномерно распределяем вычисление значения из нашего диапазон
+		return static_cast<int>(rand() * fraction * (max-min+ 1)+min);
+	}
+
+	
+	void swapCard(Card &a, Card &b)
+	{
+		Card temp = a;
+		a=b;
+		b=temp;
+	}
+
+public:
+	Deck(){
+		// заполнить массив картами и перемешать
+		consec_fill();
+		shuffleDeck();
+	}
+
+	void consec_fill(){
+		for(int i=0; i<52; ++i){
+			m_deck[i] = Card(static_cast<Card::CardRank>(i % Card::MAX_RANKS), static_cast<Card::CardSuit>(i % Card::MAX_SUITS));
+		}
+	}
+
+
+	void shuffleDeck(){
+		//перемешиваем карты
+		for(int index=0; index<52;++index)
+		{
+			// Выбираем любую случайную карту
+			int swapIndex = getRandomNumber(0, 51);
+			// Меняем местами с нашей текущей картой
+			swapCard(m_deck[index],m_deck[swapIndex]);
+		}
+	}
+
+
+
+	void printDeck() const
+	{
+		for(auto &card : m_deck)
+		{
+			card.printCard();
+			std::cout <<'\n';
+		}
+
+		std::cout <<'\n';
+	}
+
+};
+
+
+
+int main()
+{
+	srand(static_cast<unsigned int>(time(0))); // используем системные часы в качестве стартового значения
+	rand(); // пользователям Visual Studio: делаем сброс первого случайного числа
+
+ 	Deck deck;
+ 	deck.printDeck();
+ 	deck.shuffleDeck();
+ 	deck.printDeck();
+
+ 	return 0;
+}
+
+
+
+Ответ No 4.b)
+
+
+#include <iostream>
+#include <array>
+#include <ctime> // для time()
+#include <cstdlib> // для rand() и srand()
+ 
+class Card
+{
+public:
+	enum CardSuit
+	{
+		SUIT_CLUB,
+		SUIT_DIAMOND,
+		SUIT_HEART,
+		SUIT_SPADE,
+		MAX_SUITS
+	};
+ 
+	enum CardRank
+	{
+		RANK_2,
+		RANK_3,
+		RANK_4,
+		RANK_5,
+		RANK_6,
+		RANK_7,
+		RANK_8,
+		RANK_9,
+		RANK_10,
+		RANK_JACK,
+		RANK_QUEEN,
+		RANK_KING,
+		RANK_ACE,
+		MAX_RANKS
+	};
+ 
+private:
+	CardRank m_rank;
+	CardSuit m_suit;
+ 
+public:
+ 
+	Card(CardRank rank=MAX_RANKS, CardSuit suit=MAX_SUITS) :
+		m_rank(rank), m_suit(suit)
+	{
+ 
+	}
+ 
+	void printCard() const
+	{
+		switch (m_rank)
+		{
+		case RANK_2:		std::cout << '2'; break;
+		case RANK_3:		std::cout << '3'; break;
+		case RANK_4:		std::cout << '4'; break;
+		case RANK_5:		std::cout << '5'; break;
+		case RANK_6:		std::cout << '6'; break;
+		case RANK_7:		std::cout << '7'; break;
+		case RANK_8:		std::cout << '8'; break;
+		case RANK_9:		std::cout << '9'; break;
+		case RANK_10:		std::cout << 'T'; break;
+		case RANK_JACK:		std::cout << 'J'; break;
+		case RANK_QUEEN:	std::cout << 'Q'; break;
+		case RANK_KING:		std::cout << 'K'; break;
+		case RANK_ACE:		std::cout << 'A'; break;
+		}
+ 
+		switch (m_suit)
+		{
+		case SUIT_CLUB:		std::cout << 'C'; break;
+		case SUIT_DIAMOND:	std::cout << 'D'; break;
+		case SUIT_HEART:	std::cout << 'H'; break;
+		case SUIT_SPADE:	std::cout << 'S'; break;
+		}
+	}
+ 
+	int getCardValue() const
+	{
+		switch (m_rank)
+		{
+		case RANK_2:		return 2;
+		case RANK_3:		return 3;
+		case RANK_4:		return 4;
+		case RANK_5:		return 5;
+		case RANK_6:		return 6;
+		case RANK_7:		return 7;
+		case RANK_8:		return 8;
+		case RANK_9:		return 9;
+		case RANK_10:		return 10;
+		case RANK_JACK:		return 10;
+		case RANK_QUEEN:	return 10;
+		case RANK_KING:		return 10;
+		case RANK_ACE:		return 11;
+		}
+ 
+		return 0;
+	}
+};
+ 
+class Deck
+{
+private:
+	std::array<Card, 52> m_deck;
+ 
+	// Генерируем случайное число между min и max (включительно).
+	// Предполагается, что srand() уже был вызван
+	static int getRandomNumber(int min, int max)
+	{
+		static const double fraction = 1.0 / (static_cast<double>(RAND_MAX) + 1.0); // используем static, так как это значение нужно вычислить единожды
+		// Равномерно распределяем вычисление значения из нашего диапазона
+		return static_cast<int>(rand() * fraction * (max - min + 1) + min);
+	}
+ 
+	static void swapCard(Card &a, Card &b)
+	{
+		Card temp = a;
+		a = b;
+		b = temp;
+	}
+ 
+public:
+	Deck()
+	{
+		int card = 0;
+		for (int suit = 0; suit < Card::MAX_SUITS; ++suit)
+			for (int rank = 0; rank < Card::MAX_RANKS; ++rank)
+			{
+				m_deck[card] = Card(static_cast<Card::CardRank>(rank), static_cast<Card::CardSuit>(suit));
+				++card;
+			}
+	}
+ 
+	void printDeck() const
+	{
+		for (const auto &card : m_deck)
+		{
+			card.printCard();
+			std::cout << ' ';
+		}
+ 
+		std::cout << '\n';
+	}
+ 
+ 
+	void shuffleDeck()
+	{
+		// Перебираем каждую карту в колоде
+		for (int index = 0; index < 52; ++index)
+		{
+			// Выбираем любую случайную карту
+			int swapIndex = getRandomNumber(0, 51);
+			// Меняем местами с нашей текущей картой
+			swapCard(m_deck[index], m_deck[swapIndex]);
+		}
+	}
+};
+ 
+int main()
+{
+	srand(static_cast<unsigned int>(time(0))); // используем системные часы в качестве стартового значения
+	rand(); // пользователям Visual Studio: делаем сброс первого случайного числа
+ 
+	Deck deck;
+	deck.printDeck();
+	deck.shuffleDeck();
+	deck.printDeck();
+ 
+	return 0;
+}
+
+
+
+
+
+
+
+
+c) Теперь нам нужен способ отследить то, какая карта будет раздаваться следующей (в исходной программе для этого
+используется cardptr):
+
+ Во-первых, добавьте в класс Deck целочисленный член m_cardIndex и инициализируйте его значение 0. 
+  m_cardIndex будет содержать номер текущей (верхней, значения от 52 до 1) карты в колоде.
+
+ Во-вторых, создайте открытый метод dealCard(), который будет возвращать константную ссылку на текущую карту и
+  увеличивать m_cardIndex.
+
+ В-третьих, метод shuffleDeck() также должен быть обновлен для сброса m_cardIndex (так как после перетасовки колоды,
+  раздается карта, которая является верхней).
+
+Следующий фрагмент должен скомпилироваться без ошибок:
+
+1 int main()
+2 {
+3 	srand(static_cast<unsignedint>(time(0))); //используем системныечасы вкачестве стартового значения
+4 	rand(); // пользователям Visual Studio: делаем сброс первогослучайного числа
+5
+6 	Deck deck;
+7 	deck.shuffleDeck();
+8 	deck.printDeck();
+9 	std::cout<< "The first card has value: "<< deck.dealCard().getCardValue()<< '\n';
+10 	std::cout<< "The second card has value: " << deck.dealCard().getCardValue() << '\n';
+11
+12 return 0;
+13 }
+
+
+Ответ No 4.c)
+
+
+d) Почти готово! Теперь немного самостоятельности:
+ Добавьте в программу функции getPlayerChoice() и playBlackjack()
+ Измените функцию playBlackjack() в соответствии с уже имеющимся классом и методами.
+ Удалите лишнее и добавьте нужное в функцию main() (см.полный код выше).
+
+
+Ответ No 4.d)
+
+Ура!
