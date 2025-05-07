@@ -1,0 +1,502 @@
+Урок No 131. Перегрузка операторов через дружественные функции
+
+
+На этом уроке мы рассмотрим перегрузку операторов через дружественные функции в языке С++, на следующем — через
+обычные функции, а затем — через методы класса.
+
+Оглавление:
+1. Способы перегрузки операторов
+2. Перегрузка операторов через дружественные функции
+3. Дружественные функции могут быть определены внутри класса
+4. Перегрузка операторов с операндами разных типов       
+5. Еще один пример
+6. Тест
+
+
+Способы перегрузки операторов
+
+Арифметические операторы плюс ( + ), минус ( - ), умножение ( * ) и деление ( / ) являются одними из наиболее используемых
+операторов в языке C++. Все они являются бинарными, то есть работают только с двумя операндами.
+
+Есть три разных способа перегрузки операторов:
+ через дружественные функции;
+ через обычные функции;
+ через методы класса.
+
+
+Перегрузка операторов через дружественные функции
+
+Используя следующий класс:
+
+1 class Dollars
+2 {
+3 private:
+4 	int m_dollars;
+5
+6 public:
+7 	Dollars(int dollars){m_dollars = dollars; }
+8 	int getDollars() const { returnm_dollars; }
+9 };
+
+Перегрузим оператор плюс (+) для выполнения операции сложения двухобъектов класса Dollars:
+
+1 #include <iostream>
+2
+3 class Dollars
+4 {
+5 private:
+6 int m_dollars;
+7
+8 public:
+9 Dollars(intdollars) { m_dollars=dollars;}
+10
+11 //Выполняем Dollars + Dollarsчерез дружественную функцию
+12 friend Dollars operator+(const Dollars &d1,const Dollars &d2);
+13
+14 int getDollars() const {return m_dollars; }
+15 };
+16
+17 // Примечание: Эта функция не является методом класса! 
+18 / /Используем конструктор Dollars и operator+(int, int).
+20 Dollars operator+(const Dollars &d1,const Dollars &d2)
+19 {
+21 	// Мы имеем доступ к закрытому члену m_dollars, поскольку эта функция является дружественной классу Dollars
+22 	return Dollars(d1.m_dollars + d2.m_dollars);
+23 }
+24
+25 int main()
+26 {
+27 Dollars dollars1(7);
+28 Dollars dollars2(9);
+29 Dollars dollarsSum = dollars1 + dollars2;
+30 std::cout << "I have " << dollarsSum.getDollars()<< " dollars." << std::endl;
+31
+32 return 0;
+33 }
+
+Результат выполнения программы:
+I have 16 dollars.
+
+Здесь мы:
+ объявили дружественную функцию operator+();
+ задали в качестве параметров два операнда, с которыми хотим работать — два объекта класса Dollars;
+ указали соответствующий тип возврата — Dollars;
+ записали реализацию операции сложения.
+
+Для выполнения операции сложения двух объектов класса Dollars нам нужно добавить к переменной-члену m_dollars
+первого объекта m_dollars второго объекта. Поскольку наша перегруженная функция operator+() является дружественной
+классу Dollars, то мы можем напрямую обращаться к закрытому члену m_dollars. Кроме того, поскольку m_dollars является
+целочисленным значением, а C++ знает, как добавлять целочисленные значения, то компилятор будет использовать
+встроенную версию operator+() для работы с типом int, поэтому мы можем просто указать оператор + в нашей операции
+сложения двух объектов класса Dollars.
+
+Перегрузка оператора минус(−) аналогична:
+1 #include<iostream>
+2
+3 class Dollars
+4 {
+5 private:
+6 int m_dollars;
+7
+8 public:
+9 Dollars(int dollars) { m_dollars=dollars;}
+10
+11 //Выполняем Dollars + Dollars через дружественную функцию
+12 friend Dollars operator+(const Dollars &d1, const Dollars &d2);
+13
+14 //Выполняем Dollars - Dollars через дружественную функцию
+15 friend Dollars operator-(const Dollars &d1,c onst Dollars &d2);
+16
+17 int getDollars() const {return m_dollars; }
+18 };
+19
+20 //Примечание: Эта функция не является методом класса!
+21 Dollars operator+(const Dollars &d1, const Dollars &d2)
+22 {
+23 // Используем конструктор Dollars и operator+(int, int).
+24 // Мы имеем доступ к закрытому члену m_dollars, поскольку эта функция является дружественной классу Dollars
+25 return Dollars(d1.m_dollars + d2.m_dollars);
+26 }
+27
+28 // Примечание: Эта функция не является методом класса!
+29 Dollars operator-(const Dollars &d1,const Dollars &d2)
+30 {
+31 // Используем конструктор Dollars и operator-(int, int).
+32 // Мы имеемдоступ к закрытому члену m_dollars, поскольку эта функция является дружественной классу Dollars
+33 return Dollars(d1.m_dollars - d2.m_dollars);
+34 }
+35
+36 int main()
+37 {
+38 Dollars dollars1(5);
+39 Dollars dollars2(3);
+40 Dollars dollarsSum = dollars1 - dollars2;
+41 std::cout<< "I have " << dollarsSum.getDollars()<< " dollars."<< std::endl;
+42
+43 return 0;
+44 }
+
+Перегрузки оператора умножения ( * ) и оператора деления ( / ) аналогичны, только вместо знака минус указываете * или /.
+
+
+Дружественные функции могут быть определены внутри класса
+
+Несмотря на то, что дружественные функции не являются членами класса, они по-прежнему могут быть определены внутри
+класса, если это необходимо:
+
+1 #include <iostream>
+2
+3 class Dollars
+4 {
+5 private:
+6 	int m_dollars;
+7
+8 public:
+9 	Dollars(int dollars) { m_dollars=dollars;}
+10
+11 	// Выполняем Dollars + Dollars через дружественную функцию.
+12 	// Эта функция не рассматривается как метод класса, хотя она и определена внутри класса
+13 	friend Dollars operator+(const Dollars &d1, const Dollars &d2)
+14 	{
+15 		// Используем конструктор Dollars и operator+(int, int).
+16 		// Мы имеем доступ кз акрытому члену m_dollars, поскольку эта функция является дружественной классу Dollars
+17 		return Dollars(d1.m_dollars + d2.m_dollars);
+18 	}
+19
+20 int getDollars() const {return m_dollars; }
+21 };
+22
+23 int main()
+24 {
+25 	Dollars dollars1(7);
+26 	Dollars dollars2(9);
+27 	Dollars dollarsSum = dollars1 + dollars2;
+28 	std::cout<< "Ihave " << dollarsSum.getDollars()<< " dollars."<< std::endl;
+29
+30 	return 0;
+31 }
+
+Не рекомендуется так делать, поскольку нетривиальные определения функций лучше записывать в отдельном файле.cpp вне
+тела класса (детально об этом читайте в материалах урока No 122).
+
+
+Перегрузка операторов с операндами разных типов
+
+Один оператор может работать с операндами разных типов. Например, мыможем добавить Dollars(5) к числу 5 для
+получения результата Dollars(10).
+Когда C++ обрабатывает выражение a + b, то a становится первым параметром, а b — вторым параметром. Когда a и b
+одного и того же типа данных, то неимеет значения, пишете ли вы a + b или b +a — в любом случае вызывается одна и та
+же версия operator+(). Однако, если операнды разных типов, то a + b — этоуже не то же самое, что b + a.
+Например, Dollars(5) +5 приведет к вызову operator+(Dollars, int), а 5 + Dollars(5) приведет к вызову operator+(int,Dollars).
+Следовательно, всякий раз, при перегрузке бинарных операторов для работы с операндами разных типов, нужно писать две функции —
+по одной на каждый случай. Например:
+
+1 #include <iostream>
+2
+3 class Dollars
+4 {
+5 private:
+6 	int m_dollars;
+7
+8 public:
+9 	Dollars(int dollars) { m_dollars=dollars;}
+10
+11 	// Выполняем Dollars + int через дружественную функцию
+12 	friend Dollars operator+(const Dollars &d1, int value);
+13
+14 	//Выполняем int + Dollars через дружественную функцию
+15 	friend Dollars operator+(int value, const Dollars &d1);
+16
+17
+18 	int getDollars() { return m_dollars; }
+19 };
+20
+21 // Примечание: Эта функция не является методом класса!
+22 Dollars operator+(const Dollars &d1, int value)
+23 {
+24 	// Используем конструктор Dollars и operator+(int, int).
+25 	// Мы имеем доступ к закрытому члену m_dollars, поскольку эта функция является дружественной классу Dollars
+26 	return Dollars(d1.m_dollars + value);
+27 }
+28
+29 //Примечание: Эта функция не являетсяметодом класса!
+30 Dollars operator+(int value, const Dollars &d1)
+31 {
+32 	// Используемконструктор Dollars и operator+(int, int).
+33 	// Мы имеем доступ к закрытому члену m_dollars, поскольку эта функция является дружественной классу Dollars
+34 	return Dollars(d1.m_dollars + value);
+35 }
+36
+37 int main()
+38 {
+39 	Dollars d1 = Dollars(5) + 5;
+40 	Dollars d2 = 5 + Dollars(5);
+41
+42 	std::cout << "I have " << d1.getDollars() << " dollars." << std::endl;
+43 	std::cout << "I have " << d2.getDollars() << " dollars." << std::endl;
+44
+45 	return 0;
+46 }
+
+Обратите внимание, обе перегруженные функции имеют одну и ту же реализацию — это потому, что они выполняют одно и то
+же, но просто принимают параметры в разном порядке.
+
+
+Еще один пример
+
+Рассмотрим другой пример:
+
+1 #include <iostream>
+2
+3 class Values
+4 {
+5 private:
+6 	int m_min; // минимальное значение, которое мы обнаружили до сихпор
+7 	int m_max; // максимальное значение, которое мы обнаружили до сих пор
+8
+9 public:
+10 	Values(int min,int max)
+11 	{
+12 		m_min=min;
+13 		m_max=max;
+14 	}
+15
+16 	int getMin() { return m_min;}
+17 	int getMax() { return m_max;}
+18
+19 	friend Values operator+(const Values &v1, const Values &v2);
+20 	friend Valueso perator+(const Values &v, int value);
+21 	friend Values operator+(int value, const Values &v);
+22 };
+23
+24 Values operator+(const Values &v1, const Values &v2)
+25 {
+26 	// Определяе мминимальное значение между v1 и v2
+27 	int min=v1.m_min < v2.m_min ? v1.m_min : v2.m_min;
+28
+29 	// Определяем максимальное значение между v1 и v2
+30 	int max=v1.m_max > v2.m_max ? v1.m_max : v2.m_max;
+31
+32 	return Values(min, max);
+33 }
+34
+35 Values operator+(const Values &v, int value)
+36 {
+37 	// Определяем минимальное значение между v и value
+38 	int min=v.m_min<value ? v.m_min : value;
+39
+40 	// Определяем максимальное значение между v и value
+41 	int max=v.m_max>value ? v.m_max : value;
+42
+43 	return Values(min, max);
+44 }
+45
+46 Values operator+(int value, const Values &v)
+47 {
+48 	// Вызываем operator+(Values, int)
+49 	return v + value;
+50 }
+51
+52 int main()
+53 {
+54 	Values v1(11,14);
+55 	Values v2(7, 10);
+56 	Values v3(4, 13);
+57
+58 	Values vFinal = v1 + v2 + 6 + 9 + v3 + 17;
+59
+60 	std::cout << "Result:(" << vFinal.getMin() << "," << vFinal.getMax() << ")\n";
+61
+62 	return 0;
+63 }
+
+Класс Values отслеживает минимальное и максимальное значения. Мы перегрузили оператор плюс (+) 3 раза для выполнения
+операции сравнения двух объектов класса Values и операции сложения целочисленного значения с объектом класса Values.
+
+Результат выполнения программы:
+Result: (4,17)
+
+Мы получили минимальное и максимальное значения из всех, которые указали в vFinal. Рассмотрим детально, как
+обрабатывается строка Values vFinal = v1 + v2 + 6 + 9 +v3 +17; :
+
+ Приоритет оператора + выше приоритета оператора =, а ассоциативность оператора + слева направо, поэтому
+сначала вычисляется v1 + v2. Это приводит к вызову operator+(v1, v2), которое возвращает Values(7, 14).
+
+ Следующей выполняется операция Values(7, 14) + 6. Это приводит к вызову operator+(Values(7,14), 6),
+которое возвращаетValues(6, 14).
+
+ Затем выполняется Values(6, 14) + 9, которое возвращает Values(6,14).
+
+ ЗатемValues(6, 14)+ v3 возвращает Values(4, 14).
+
+ И, наконец, Values(4, 14) + 17 возвращает Values(4, 17). Это и является нашим конечным результатом, который и
+присваивается vFinal .
+
+Другими словами, вышеприведенное выражение обрабатывается как Values vFinal = (((((v1 +v2) + 6) + 9) +v3) +17),
+причем каждая последующая операция сложения возвращает объект класса Values, который становится левым
+операндом для следующего оператора +.
+
+Примечание: Мы определили operator+(int,Values) вызовом operator+(Values, int) (см. код выше). Это может
+быть менее эффективным, нежели отдельная полная реализация (за счет дополнительного вызова функции), но таким
+образом наш код стал короче и проще в поддержке + мы уменьшили дублирование кода. Когда это возможно, то
+определяйте перегруженный оператор вызовом другого перегруженного оператора (как в нашем примере, приведенном 
+выше)!
+
+Тест
+
+a) Напишите класс Fraction, который имеет два целочисленных члена: числитель и знаменатель. Реализуйте функцию print(),
+которая будет выводить дробь.
+Следующий фрагмент кода:
+
+1 #include <iostream>
+2
+3 int main()
+4 {
+5 	Fraction f1(1, 4);
+6 	f1.print();
+7
+8 	Fraction f2(1, 2);
+9 	f2.print();
+10 }
+
+Должен выдавать следующий результат:
+1/4
+1/2
+------
+
+#include <iostream>
+class Fraction{
+private:
+	int m_chislitel;
+	int m_znamenatel;
+public: 
+	Fraction(int a, int b):m_chislitel{a},m_znamenatel{b}
+	{
+	}
+
+	void print(){std::cout << m_chislitel << '/' << m_znamenatel << '\n';}
+};
+
+
+Ответ а)
+
+b) Добавьте перегрузку оператора умножения (*) для выполнения операции умножения объекта класса Fraction на
+целочисленное значение и для перемножения двух объектов класса Fraction. Используйте способ перегрузки оператора через
+дружественную функцию.
+
+Подсказка: Умножение двух дробей осуществляется умножением двух числителей, а затем отдельно двух знаменателей.
+Для выполнения операции умножения объекта на целочисленное значение, умножьте только числитель на
+целочисленное значение (знаменатель не трогайте).
+Следующий фрагмент кода:
+
+1 #include <iostream>
+2
+3 int main()
+4 {
+5 Fraction f1(3, 4);
+6 f1.print();
+7
+8 Fraction f2(2, 7);
+9 f2.print();
+10
+11 Fraction f3 = f1 * f2;
+12 f3.print();
+13
+14 Fraction f4 = f1 * 3;
+15 f4.print();
+16
+17 Fraction f5=3*f2;
+18 f5.print();
+19
+20 Fraction f6 = Fraction(1, 2) * Fraction(2, 3) * Fraction(3, 4);
+21 f6.print();
+22 }
+
+Должен выдавать следующий результат:
+3/4
+2/7
+6/28
+9/4
+6/7
+6/24
+------------
+
+#include <iostream>
+class Fraction{
+private:
+	int m_chislitel;
+	int m_znamenatel;
+public: 
+	Fraction(int a, int b):m_chislitel{a},m_znamenatel{b}
+	{
+	}
+
+	void print(){std::cout << m_chislitel << '/' << m_znamenatel << '\n';}
+	friend Fraction operator*(const Fraction &v1, const Fraction &v2);
+	friend Fraction operator*(int value, const Fraction &v);
+	friend Fraction operator*(const Fraction &v, int value);
+};
+
+Fraction operator*(const Fraction &v1, const Fraction &v2){
+	return 	Fraction(v1.m_chislitel*v2.m_chislitel, v1.m_znamenatel*v2.m_znamenatel);
+}
+
+Fraction operator*(int value, const Fraction &v){
+	return 	Fraction(value*v.m_chislitel, v.m_znamenatel);
+}
+
+Fraction operator*(const Fraction &v, int value){
+	return 	value*v;
+}
+
+Ответ b)
+
+Дополнительное задание
+c) Дробь 2/4 — это та же дробь, что и 1/2, только 1/2 не делится до минимальных неделимых значений. Мы можем уменьшить
+любую заданную дробь до наименьших значений, найдя наибольший общий делитель (НОД) для числителя и знаменателя, а
+затем выполнить деление как числителя, так и знаменателя на НОД.
+Ниже приведена функция поиска НОД:
+
+1 int nod(int a, int b) {
+2 return (b == 0) ? ( a > 0 ? a : -a) : nod(b, a % b);
+3 }
+
+Добавьте эту функцию в ваш класс и реализуйте метод reduce(), который будет уменьшать дробь. Убедитесь, что дробь будет
+максимально и корректно уменьшена.
+Следующий фрагмент кода:
+
+1 #include <iostream>
+2
+3 int main()
+4 {
+5 Fraction f1(3, 4);
+6 f1.print();
+7
+8 Fraction f2(2, 7);
+9 f2.print();
+10
+11 Fraction f3=f1 * f2;
+12 f3.print();
+13
+14 Fraction f4=f1 * 3;
+15 f4.print();
+16
+17 Fraction f5=3*f2;
+18 f5.print();
+19
+20 Fraction f6=Fraction(1, 2)*Fraction(2, 3)*Fraction(3, 4);
+21 f6.print();
+22
+23 return 0;
+24 }
+
+Должен выдавать следующий результат:
+3/4
+2/7
+3/14
+9/4
+6/7
+1/4
+
+Ответ c)
+1

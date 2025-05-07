@@ -1,0 +1,427 @@
+Урок No 133. Перегрузка операторов ввода и вывода
+
+На этом уроке мы рассмотрим перегрузку операторов ввода и вывода в языке C++.
+
+Оглавление:
+1. Перегрузка оператора вывода <<
+2. Перегрузка оператора ввода >>
+3. Заключение
+4. Тест
+
+
+Перегрузка оператора вывода <<
+
+Для классов с множеством переменных-членов, выводить в консоль каждую переменную по отдельности может быть
+несколько утомительно. Например, рассмотрим следующий класс:
+
+1 class Point
+2 {
+3 private:
+4 	double m_x, m_y, m_z;
+5
+6 public:
+7 	Point(double x=0.0, doubley=0.0,double z=0.0): m_x(x),m_y(y),m_z(z)
+8 	{
+9 	}
+10
+11 	double getX() { return m_x; }
+12 	double getY() { return m_y; }
+13 	double getZ() { return m_z; }
+14 };
+
+Если вы захотите вывести объект этого класса на экран, то вам нужно будет сделать что-то вроде следующего:
+
+1 Point point(3.0, 4.0, 5.0);                                             
+2 std::cout << "Point(" << point.getX() << ", " <<
+3 point.getY() << ", " <<
+4 point.getZ() << ")";
+
+Конечно, было бы проще написать отдельную функцию для вывода, которую можно было бы повторно использовать.
+Например, функцию print():
+
+1 class Point
+2 {
+3 private:
+4 	double m_x, m_y, m_z;
+5
+6 public:
+7 	Point(double x=0.0, doubley=0.0,double z=0.0): m_x(x),m_y(y),m_z(z)
+8 	{
+9 	}
+10
+11 	double getX() { return m_x; }
+12 	double getY() { return m_y; }
+13 	double getZ() { return m_z; }
+14
+15 	void print()
+16 	{
+17 		std::cout << "Point("<< m_x << ", " << m_y << ", " << m_z << ")";
+18 	}
+19 };
+
+Теперь уже намного лучше, но здесь также есть свои нюансы. Поскольку метод print() имеет тип void, то его нельзя вызывать в
+середине стейтмента вывода. Вместо этого стейтмент вывода придется разбить на несколько частей (строк):
+
+1 int main()
+2 {
+3 	Point point(3.0, 4.0, 5.0);
+4
+5 	std::cout << "My point is:";
+6 	point.print();
+7 	std::cout << " in Cartesian space.\n";
+8 }
+
+Авот если бы мы могли просто написать:
+
+1 Point point(3.0, 4.0, 5.0);
+2 cout << "My point is: "<< point << " in Cartesian space.\n";
+
+И получить тот же результат, но без необходимости разбивать стейтмент вывода на несколько строк и помнить название
+функции вывода. К счастью, это можно сделать, перегрузив оператор вывода << .
+
+Перегрузка оператора вывода << аналогична перегрузке оператора + (оба являются бинарными операторами), за
+исключением того, что их типы различны.
+
+Рассмотрим выражение std::cout << point. 
+Если оператором является << , то чем тогдаявляются операнды? 
+Левым операндом является объект std::cout, а правым — объект нашего класса Point. 
+std::cout фактически является объектом типа std::ostream, поэтому перегрузка оператора << выглядит следующим образом:
+
+1 // std::cout - это объект std::ostream
+2 friend std::ostream& operator<< (std::ostream &out, const Point &point);
+
+Реализация перегрузки оператора << для нашего класса Point довольно-таки проста, так как C++ уже знает, как выводить
+значения типа double, а все наши переменные-члены имеют тип double, поэтому мы можем просто использовать оператор <<
+для вывода переменных-членов нашего Point. Вот класс Point, приведенный выше, но уже с перегруженным оператором <<:
+
+1 #include <iostream>
+2
+3 class Point
+4 {
+5 private:
+6 	double m_x, m_y, m_z;
+7
+8 public:
+9 	Point(double x=0.0, doubley=0.0,double z=0.0): m_x(x),m_y(y),m_z(z)
+10 	{
+11 	}
+12
+13 	friend std::ostream& operator<< (std::ostream &out, const Point &point);
+14 };
+15
+16 std::ostream& operator<< (std::ostream &out, const Point &point)
+17 {
+18 	//Поскольку operator<< является другом класса Point, томы имеем прямойдоступк членам Point
+19 	out << "Point(" <<point.m_x << ", " << point.m_y<< ", " << point.m_z << ")";
+20
+21 	return out;
+22 }
+23
+24 int main()
+25 {
+26 Point point1(5.0, 6.0, 7.0);
+27
+28 std::cout << point1;
+29
+30 return 0;
+31 }
+
+Всё довольно просто. Обратите внимание, насколько проще стал стейтмент вывода по сравнению с другими стейментами из
+вышеприведенных примеров. Наиболее заметным отличием является то, что std::cout стал параметром out в нашей функции
+перегрузки (который затем станет ссылкой на std::cout при вызове этого оператора).
+
+Самое интересное здесь — тип возврата. С перегрузкой арифметических операторов мы вычисляли и возвращали результат
+по значению. Однако, если вы попытаетесь возвратить std::ostream по значению, то получите ошибку компилятора. Это
+случится из-за того, что std::ostream запрещает свое копирование.
+В этом случае мы возвращаем левый параметр в качестве ссылки. Это не только предотвращает создание копии std::ostream,
+но также позволяет нам «связать» стейтменты вывода вместе, например, std::cout << point << std::endl;.
+
+Вы могли бы подумать, что, поскольку оператор << не возвращает значение обратно в caller, то мы должны были бы указать
+тип возврата void. Но подумайте, что произойдет,если наш оператор << будет возвращать void. Когда компилятор
+обрабатывает std::cout << point << std::endl;, то, учитывая правила приоритета/ассоциативности, он будет
+обрабатывать это выражение как (std::cout << point) << std::endl;. Тогда std::cout << point приведет к вызову
+функции перегрузки оператора <<, которая возвратит void, и вторая часть выражения будет обрабатываться как void <<
+std::endl; — в этом нетсмысла!
+
+Возвращая параметр out в качестве возвращаемого значения выражения (std::cout << point) мы возвращаем std::cout,
+и вторая часть нашего выражения обрабатывается как std::cout << std::endl; — вот где сила!
+
+Каждый раз, когдамы хотим, чтобы наши перегруженные бинарные операторы были связаны таким образом, то левый
+операнд обязательно должен быть возвращен (по ссылке). Возврат левого параметра по ссылке в этом случае работает, 
+так как он передается в функцию самим вызовом этой функции, и должен оставаться даже после выполнения и возврата этой
+функции. Таким образом, мы можем не беспокоиться о том, что ссылаемся на что-то, что выйдет из области видимости и
+уничтожится после выполнения функции. Например:
+
+1 #include <iostream>
+2
+3 class Point
+4 {
+5 private:
+6 	double m_x, m_y, m_z;
+7
+8 public:
+9 	Point(double x=0.0, doubley=0.0,double z=0.0): m_x(x),m_y(y),m_z(z)
+10 	{
+11 	}
+12
+13 	friend std::ostream& operator<< (std::ostream &out, const Point &point);
+14 };
+15
+16 std::ostream& operator<< (std::ostream &out, const Point &point)
+17 {
+18 	//Поскольку operator<< является другом класса Point, томы имеем прямойдоступк членам Point
+19 	out << "Point(" <<point.m_x << ", " << point.m_y<< ", " << point.m_z << ")";
+20
+21 	return out;
+22 }
+23
+24 int main()
+25 {
+26 Point point1(3.0, 4.7, 5.0);
+27 Point point2(9.0, 10.5, 11.0);
+28
+29 std::cout << point1 << " "<< point2 << '\n';
+30
+31 return 0;
+32 }
+
+Результат выполнения программы:
+Point(3, 4.7, 5) Point(9, 10.5, 11)
+
+
+Перегрузкаоператора ввода >>
+
+Также можно перегрузить и оператор ввода. Всё почти так же, как и с оператором вывода, но главное, что нужно помнить —
+std::cin является объектом типа std::istream. Вот наш класс Point с перегруженным оператором ввода >> :
+
+1 #include <iostream>
+2
+3 class Point
+4 {
+5 private:
+6 	double m_x, m_y, m_z;
+7
+8 public:
+9 	Point(double x=0.0, doubley=0.0,double z=0.0): m_x(x),m_y(y),m_z(z)
+10 	{
+11 	}
+12
+13 	friend std::ostream& operator<< (std::ostream &out, const Point &point);
+14 	friend std::istream& operator>> (std::istream &in, Point &point);
+15 };
+16
+17 std::ostream& operator<< (std::ostream &out, const Point &point)
+18 {
+19 	//Поскольку operator<< является другом класса Point, томы имеем прямойдоступк членам Point
+20 	out << "Point(" <<point.m_x << ", " << point.m_y<< ", " << point.m_z << ")";
+21
+22 	return out;
+23 }
+24
+25 std::istream& operator>> (std::istream &in, Point &point)
+26 {
+27 	//Поскольку operator>> является другом класса Point, томы имеем прямой доступ к членам Point.
+28 	//Обратите внимание, параметр point (объект класса Point) должен быть неконстантным, чтобы мы имели возможность изменить члены класса
+29 	in >> point.m_x;
+30 	in >> point.m_y;
+31 	in >> point.m_z;
+32
+33 	return in;
+34 }
+
+Вот пример программы с использованием перегруженных операторов << и >>:
+
+1 int main()
+2 {
+3 	std::cout << "Enter a point: \n";
+4
+5 	Point point;
+6 	std::cin >> point;
+7
+8 	std::cout << "You entered: " << point << '\n';
+9
+10 	return 0;
+11 }
+
+Предположим,что пользователь введет 4.0 , 5.5 и 8.37, тогда результат выполнения программы:
+You entered: Point(4, 5.5, 8.37)
+
+Заключение
+
+Перегрузка операторов << и >> намного упрощает процесс вывода класса на экран и получение пользовательского ввода с
+записью в класс.
+
+Тест
+
+Используя класс Fraction, представленный ниже, добавьте перегрузку операторов << и >> .
+Следующий фрагмент кода:
+
+1 int main()
+2 {
+3
+4 	Fraction f1;
+5 	std::cout << "Enter fraction 1: ";
+6 	std::cin >> f1;
+7
+8 	Fraction f2;
+9 	std::cout << "Enter fraction 2: ";
+10 	std::cin >> f2;
+11
+12 	std::cout << f1 <<" * " << f2 <<" is " << f1 * f2 << '\n';
+13
+14 	return 0;
+15 }
+
+Должен выдавать следующий результат:
+Enter fraction 1: 3/4
+Enter fraction 2: 4/9
+3/4 * 4/9 is 1/3
+
+Вот класс Fraction:
+
+1 #include <iostream>
+2
+3 class Fraction
+4 {
+5 private:
+6 	int m_numerator;
+7 	int m_denominator;
+8
+9 public:
+10 	Fraction(int numerator=0, int denominator=1):
+11 		m_numerator(numerator), m_denominator(denominator)
+12 	{
+13 		// Мы поместили методreduce() в конструктор,чтобы убедиться, что все дроби, которые у насесть,
+14 		// Вседроби, которыеперезаписаны, должны быть повторно уменьшены
+15 		reduce();
+16 	}
+17
+18  	// Делаем функцию nod() статической, чтобы она могла быть частью класса Fraction и при этом, для её использования, нам не требовалось бы создавать объект класса Fraction
+19 	static int nod(inta, int b)
+20 	{
+21 		returnb == 0 ? a : nod(b, a % b);
+22 	}
+23
+24 	void reduce()
+25 	{
+26 		int nod = Fraction::nod(m_numerator, m_denominator);
+27 		m_numerator /=nod;
+28 		m_denominator /= nod;
+29 	}
+30
+31 	friend Fraction operator*(const Fraction &f1, const Fraction &f2);
+32 	friend Fraction operator*(const Fraction &f1, intvalue);
+33 	friend Fraction operator*(int value, const Fraction &f1);
+34
+35 	void print()
+36 	{
+37 		std::cout << m_numerator << "/" << m_denominator << "\n";
+38 	}
+39 };
+40
+41 Fraction operator*(const Fraction &f1, const Fraction&f2)
+42 {
+43 	return Fraction(f1.m_numerator * f2.m_numerator, f1.m_denominator * f2.m_denominator);
+44 }
+45
+46 Fraction operator*(const Fraction &f1, int value)
+47 {
+48 	return Fraction(f1.m_numerator * value, f1.m_denominator);
+49 }
+50
+51 Fraction operator*(intvalue,const Fraction &f1)
+52 {
+53 	return Fraction(f1.m_numerator * value, f1.m_denominator);
+54 }
+
+-----------------
+
+#include <iostream>
+
+class Fraction
+{
+private:
+	int m_numerator;
+	int m_denominator;
+
+public:
+ 	Fraction(int numerator=0, int denominator=1):
+ 		m_numerator(numerator), m_denominator(denominator)
+ 	{
+ 		// Мы поместили методreduce() в конструктор,чтобы убедиться, что все дроби, которые у насесть,
+ 		// Вседроби, которыеперезаписаны, должны быть повторно уменьшены
+ 		reduce();
+ 	}
+
+  	// Делаем функцию nod() статической, чтобы она могла быть частью класса Fraction и при этом, для её использования, нам не требовалось бы создавать объект класса Fraction
+ 	static int nod(int a, int b)
+ 	{
+ 		return b == 0 ? a : nod(b, a % b);
+ 	}
+
+ 	void reduce()
+ 	{
+ 		int nod = Fraction::nod(m_numerator, m_denominator);
+ 		m_numerator /=nod;
+ 		m_denominator /= nod;
+ 	}
+
+ 	friend Fraction operator*(const Fraction &f1, const Fraction &f2);
+ 	friend Fraction operator*(const Fraction &f1, int value);
+ 	friend Fraction operator*(int value, const Fraction &f1);
+
+ 	friend std::istream& operator>>(std::istream &in, Fraction &f);
+ 	friend std::ostream& operator<<(std::ostream &out, const Fraction &f);
+
+
+ 	void print()
+ 	{
+ 		std::cout << m_numerator << "/" << m_denominator << "\n";
+ 	}
+ };
+
+ Fraction operator*(const Fraction &f1, const Fraction&f2)
+ {
+ 	return Fraction(f1.m_numerator * f2.m_numerator, f1.m_denominator * f2.m_denominator);
+ }
+
+ Fraction operator*(const Fraction &f1, int value)
+ {
+ 	return Fraction(f1.m_numerator * value, f1.m_denominator);
+ }
+
+ Fraction operator*(int value, const Fraction &f1)
+ {
+ 	return Fraction(f1.m_numerator * value, f1.m_denominator);
+ }
+
+std::istream& operator>>(std::istream &in, Fraction &f){
+	in >> f.m_numerator;
+	in >> f.m_denominator;
+	return in;
+}
+
+std::ostream& operator<<(std::ostream &out, const Fraction &f){
+	out << f.m_numerator << '/' << f.m_denominator << '\n';
+	return out;
+}
+
+int main()
+{
+
+	Fraction f1;
+	std::cout << "Enter fraction 1: ";
+	std::cin >> f1;
+
+	Fraction f2;
+	std::cout << "Enter fraction 2: ";
+ 	std::cin >> f2;
+
+ 	std::cout << f1 <<" * " << f2 <<" is " << f1 * f2 << '\n';
+
+	return 0;
+}
+
+
+
+Ответ

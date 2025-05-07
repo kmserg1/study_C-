@@ -1,0 +1,131 @@
+Урок No 132. Перегрузка операторов через обычные функции
+
+На предыдущем уроке мы перегружали operator+() через дружественную функцию:
+1 #include <iostream>
+2
+3  class Dollars
+4  {
+5  private:
+6  	int m_dollars;
+7
+8  public:
+9  	Dollars(int dollars) { m_dollars = dollars; }
+10
+11 	// Выполняем Dollars + Dollars через дружественную функцию
+12 	friend Dollars operator+(const Dollars &d1, const Dollars &d2);
+13
+14 	int getDollars() const { return m_dollars; }
+15 };
+16
+17 // Примечание: Эта функция не является методом класса!
+18 Dollars operator+(const Dollars &d1, const Dollars &d2)
+19 {
+20 	// Используем конструктор Dollars и operator+(int, int).
+21 	// Мы имеем доступ к закрытому члену m_dollars, так как эта функция является дружественной классу Dollars
+22 	return Dollars(d1.m_dollars + d2.m_dollars);
+23 }
+24
+25 int main()
+26 {
+27 	Dollars dollars1(7);
+28 	Dollars dollars2(9);
+29 	Dollars dollarsSum = dollars1 + dollars2;
+30 	std::cout << "I have " << dollarsSum.getDollars() << " dollars." << std::endl;
+31
+32 	return 0;
+33 }
+
+Использование дружественной функции для перегрузки оператора удобно тем, что мы имеем прямой доступ ко всем членам
+класса, с которым работаем. В примере, приведенном выше, наша дружественная функция перегрузки оператора + имеет
+прямой доступ к закрытому члену m_dollars класса Dollars.
+Однако, если нам не нужен доступ к членам определенного класса, мы можем перегрузить оператор и через обычную
+функцию. Обратите внимание, в классе Dollars присутствует геттер getDollars(), с помощью которого мы можем получить
+доступ к m_dollars извне класса. Перепишем перегрузку оператора + через обычную функцию:
+
+1 #include <iostream>
+2
+3 class Dollars
+4 {
+5 private:
+6 	int m_dollars;
+7
+8 public:
+9 	Dollars(int dollars) { m_dollars = dollars; }
+10
+11 	int getDollars() const { return m_dollars; }
+12 };
+13
+14 // Примечание: Эта функция не является ни методом класса, ни дружественной классу Dollars!
+15 Dollars operator+(const Dollars &d1, const Dollars &d2)
+16 {
+17 	// Используем конструктор Dollars и operator+(int, int).
+18 	// Здесь нам не нужен прямой доступ к закрытым членам класса Dollars
+19 	return Dollars(d1.getDollars() + d2.getDollars());
+20 }
+21
+22 int main()
+23 {
+24 Dollars dollars1(7);
+25 Dollars dollars2(9);
+26 Dollars dollarsSum = dollars1 + dollars2;
+27 std::cout << "I have " << dollarsSum.getDollars() << " dollars." << std::endl;
+28
+29 return 0;
+30 }
+
+Поскольку принцип перегрузки операторов через обычные и дружественные функции почти идентичен (они просто имеют
+разные уровни/условия доступа к закрытым членам класса), то единственное отличие заключается в том, что в случае с
+дружественной функцией, её нужно обязательно объявить в классе, а определить вне тела класса (или в классе), в то время как
+обычную функцию достаточно просто определить вне тела класса, без указания дополнительного прототипа функции.
+
+Dollars.h:
+
+1 class Dollars
+2 {
+3 private:
+4 	int m_dollars;
+5
+6 public:
+7 	Dollars(int dollars) { m_dollars = dollars; }
+8
+9 	int getDollars() const { return m_dollars; }
+10 };
+11
+12 // Указываем прототип operator+(), чтобы иметь возможность использовать перегруженный оператор + в других файлах
+13 Dollars operator+(const Dollars &d1, const Dollars &d2);
+
+Dollars.cpp:
+
+1 #include "Dollars.h"
+2
+3 // Примечание: Эта функция не является ни методом класса, ни дружественной классу Dollars!
+4 Dollars operator+(const Dollars &d1, const Dollars &d2)
+5 {
+6 	// Используем конструктор Dollars и operator+(int, int).
+7 	// Здесь нам не нужен прямой доступ к закрытым членам класса Dollars
+8 	return Dollars(d1.getDollars() + d2.getDollars());
+9 }
+
+main.cpp:
+
+1 #include <iostream>
+2 #include "Dollars.h"
+3
+4 int main()
+5 {
+6 	Dollars dollars1(7);
+7 	Dollars dollars2(9);
+8 	Dollars dollarsSum = dollars1 + dollars2; // без явного указания прототипа operator+() в Dollars.h эта строка не скомпилиро
+9 	std::cout << "I have " << dollarsSum.getDollars() << " dollars." << std::endl;
+10
+11 	return 0;
+12 }
+
+Для перегрузки операторов рекомендуется чаще использовать обычные функции, нежели дружественные, если в классе, конечно,
+присутствуют геттеры (чем меньше функций касается внутренних элементов вашего класса, тем лучше). Однако не добавляйте
+дополнительный геттер только для того, чтобы перегрузить оператор через обычную функцию вместо дружественной! Если
+геттера нет по умолчанию или он не используется вообще (в нем нет необходимости), то тогда используйте перегрузку через
+дружественные функции.
+
+Правило: Используйте перегрузку операторов через обычные функции, вместо дружественных, если для этого не
+требуется добавление дополнительных функций в класс.
