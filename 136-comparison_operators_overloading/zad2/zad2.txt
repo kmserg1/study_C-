@@ -1,0 +1,29 @@
+Добавьте перегрузку операторов << и < в класс Car, представленный выше, чтобы следующий фрагмент кода:
+
+1 #include <iostream>
+2 #include <string>
+3 #include <vector>
+4 #include <algorithm>
+5
+6 int main()
+7 {
+8 	std::vector<Car> v;
+9 	v.push_back(Car("Ford", "Mustang"));
+10 	v.push_back(Car("Renault", "Logan"));
+11 	v.push_back(Car("Ford", "Ranger"));
+12 	v.push_back(Car("Renault", "Duster"));
+13
+14 	std::sort(v.begin(), v.end()); // требуется перегрузка оператора < для класса Car
+15
+16 	for (auto &car : v)
+17 		std::cout << car << '\n'; // требуется перегрузка оператора << для класса Car
+18
+19 	return 0;
+20 }
+
+Выдавал следующий результат:
+
+(Ford, Mustang)
+(Ford, Ranger)
+(Renault, Duster)
+(Renault, Logan)

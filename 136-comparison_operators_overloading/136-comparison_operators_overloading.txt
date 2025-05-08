@@ -1,0 +1,415 @@
+Урок No 136. Перегрузка операторов сравнения
+
+
+Принципы перегрузки операторов сравненияте же, что и в перегрузке других операторов, которые мы рассматривали на
+предыдущих уроках. Поскольку все операторы сравнения являются бинарными и не изменяют свои левые операнды, то
+выполнять перегрузку следует через дружественные функции.
+Например, перегрузим оператор равенства == и оператор неравенства != для класса Car:
+
+1 #include <iostream>
+2 #include <string>
+3
+4 class Car
+5 {
+6 private:
+7 	std::string m_company;
+8 	std::string m_model;
+9
+10 public:
+11 	Car(std::string company, std::string model)
+12 		: m_company(company), m_model(model)
+13 	{
+14 	}
+15
+16 	friend bool operator== (const Car &c1, const Car &c2);
+17 	friend bool operator!= (const Car &c1, const Car &c2);
+18 };
+19
+20 bool operator== (const Car &c1, const Car &c2)
+21 {
+22 	return (c1.m_company == c2.m_company &&
+23 	c1.m_model == c2.m_model);
+24 }
+25
+26 bool operator!= (const Car &c1, const Car &c2)
+27 {
+28 	return !(c1 == c2);
+29 }
+30
+31 int main()
+32 {
+33 	Car mustang("Ford", "Mustang");
+34 	Car logan("Renault", "Logan");
+35
+36 	if (mustang == logan)
+37 		std::cout << "Mustang and Logan are the same.\n";
+38
+39 	if (mustang != logan)
+40 		std::cout << "Mustang and Logan are not the same.\n";
+41
+42 	return 0;
+43 }
+
+Всё просто. Поскольку результат выполнения оператора != является прямо противо положным результату выполнения
+оператора == , томы определили оператор !=, используя уже перегруженный оператор == (уменьшив, таким образом,
+количество кода, сложность и возможность возникновения ошибок).
+
+А как насчет операторов < и > ?
+Здесь нужно определиться, чем один объект класса Car может быть лучше другого объекта
+класса Car, и как это всё выразить в коде. Неочевидно! Поэтому здесь мы и не перегружали операторы < и >.
+
+Совет: Не перегружайте операторы, которые являются бесполезными для вашего класса.
+Однако, операторы < и > можно использовать для сортировки списка автомобилей (объектов класса Car) в алфавитном
+порядке, используя члены m_company и m_model, поэтому всегда рассматривайте разные варианты.
+
+Некоторые классы-контейнеры Стандартной библиотеки C++ требуют перегрузки оператора < , чтобы они могли сохранять
+отсортированные элементы.
+
+Перегрузимоператоры сравнения > , <, >= и <=:
+
+1 #include <iostream>
+2
+3 class Dollars
+4 {
+5 private:
+6 	int m_dollars;
+7
+8 public:
+9 	Dollars(int dollars) { m_dollars = dollars; }
+10
+11 	friend bool operator> (const Dollars &d1, const Dollars &d2);
+12 	friend bool operator<= (const Dollars &d1, const Dollars &d2);
+13
+14 	friend bool operator< (const Dollars &d1, const Dollars &d2);
+15 	friend bool operator>= (const Dollars &d1, const Dollars &d2);
+16 };
+17
+18 bool operator> (const Dollars &d1, const Dollars &d2)
+19 {
+20 	return d1.m_dollars > d2.m_dollars;
+21 }
+22
+23 bool operator>= (const Dollars &d1, const Dollars &d2)
+24 {
+25 	return d1.m_dollars >= d2.m_dollars;
+26 }
+27
+28 bool operator< (const Dollars &d1, const Dollars &d2)
+29 {
+30 	return d1.m_dollars < d2.m_dollars;
+31 }
+32
+33 bool operator<= (const Dollars &d1, const Dollars &d2)
+34 {
+35 	return d1.m_dollars <= d2.m_dollars;
+36 }
+37
+38 int main()
+39 {
+40 	Dollars ten(10);
+41 	Dollars seven(7);
+42
+43 	if (ten > seven)
+44 		std::cout << "Ten dollars are greater than seven dollars.\n";
+45 	if (ten >= seven)
+46 		std::cout << "Ten dollars are greater than or equal to seven dollars.\n";
+47 	if (ten < seven)
+48 		std::cout << "Seven dollars are greater than ten dollars.\n";
+49 	if (ten <= seven)
+50 		std::cout << "Seven dollars are greater than or equal to ten dollars.\n";
+51
+52 	return 0;
+53 }
+
+Всё просто.
+Но,как вы ужемогли бы заметить, операторы > и <= являются логическими противоположностями, поэтому один из них
+можно было бы определить через второй. Та же ситуация и с < и >= . Но, поскольку определения функций перегрузки
+столь просты, а операторы в строке объявления функции так хорошо сочетаются с операторами встроке возврата
+результата, мы решили этого не делать.
+
+Тест
+
+Задание No 1
+Используя класс Dollars, приведенный выше, перепишите операторы < и <= , используя их логические
+противоположности.
+
+--мой ответ--------------
+
+#include <iostream>
+
+class Dollars
+{
+private:
+	int m_dollars;
+
+public:
+	Dollars(int dollars) { m_dollars = dollars; }
+
+ 	friend bool operator> (const Dollars &d1, const Dollars &d2);
+ 	friend bool operator<= (const Dollars &d1, const Dollars &d2);
+
+ 	friend bool operator< (const Dollars &d1, const Dollars &d2);
+ 	friend bool operator>= (const Dollars &d1, const Dollars &d2);
+};
+
+bool operator> (const Dollars &d1, const Dollars &d2)
+{
+	return d1.m_dollars > d2.m_dollars;
+}
+
+bool operator>= (const Dollars &d1, const Dollars &d2)
+{
+	return d1.m_dollars >= d2.m_dollars;
+}
+
+bool operator< (const Dollars &d1, const Dollars &d2)
+{
+	return !(d1.m_dollars >= d2.m_dollars);
+}
+
+bool operator<= (const Dollars &d1, const Dollars &d2)
+{
+	return !(d1.m_dollars > d2.m_dollars);
+}
+
+int main()
+{
+	Dollars ten(10);
+	Dollars seven(7);
+
+	if (ten > seven)
+		std::cout << "Ten dollars are greater than seven dollars.\n";
+	if (ten >= seven)
+		std::cout << "Ten dollars are greater than or equal to seven dollars.\n";
+	if (ten < seven)
+		std::cout << "Seven dollars are greater than ten dollars.\n";
+	if (ten <= seven)
+		std::cout << "Seven dollars are greater than or equal to ten dollars.\n";
+
+	return 0;
+}
+
+
+Ответ No 1
+
+#include <iostream>
+ 
+class Dollars
+{
+private:
+    int m_dollars;
+ 
+public:
+    Dollars(int dollars) { m_dollars = dollars; }
+ 
+    friend bool operator> (const Dollars &d1, const Dollars &d2);
+    friend bool operator<= (const Dollars &d1, const Dollars &d2);
+ 
+    friend bool operator< (const Dollars &d1, const Dollars &d2);
+    friend bool operator>= (const Dollars &d1, const Dollars &d2);
+};
+ 
+bool operator> (const Dollars &d1, const Dollars &d2)
+{
+    return d1.m_dollars > d2.m_dollars;
+}
+ 
+bool operator>= (const Dollars &d1, const Dollars &d2)
+{
+    return d1.m_dollars >= d2.m_dollars;
+}
+ 
+// Логической противоположностью оператора < является >=, поэтому мы можем просто инвертировать результат выполнения >=
+bool operator< (const Dollars &d1, const Dollars &d2)
+{
+	return !(d1 >= d2);
+}
+ 
+// Логической противоположностью оператора <= является >, поэтому мы можем просто инвертировать результат выполнения >
+bool operator<= (const Dollars &d1, const Dollars &d2)
+{
+	return !(d1 > d2);
+}
+ 
+int main()
+{
+    Dollars ten(10);
+    Dollars seven(7);
+ 
+    if (ten > seven)
+        std::cout << "Ten dollars are greater than seven dollars.\n";
+    if (ten >= seven)
+        std::cout << "Ten dollars are greater than or equal to seven dollars.\n";
+    if (ten < seven)
+        std::cout << "Seven dollars are greater than ten dollars.\n";
+    if (ten <= seven)
+        std::cout << "Seven dollars are greater than or equal to ten dollars.\n";
+ 
+    return 0;
+}
+
+
+
+Задание No 2
+Добавьте перегрузку операторов << и < в класс Car, представленный выше, чтобы следующий фрагмент кода:
+
+1 #include <iostream>
+2 #include <string>
+3 #include <vector>
+4 #include <algorithm>
+5
+6 int main()
+7 {
+8 	std::vector<Car> v;
+9 	v.push_back(Car("Ford", "Mustang"));
+10 	v.push_back(Car("Renault", "Logan"));
+11 	v.push_back(Car("Ford", "Ranger"));
+12 	v.push_back(Car("Renault", "Duster"));
+13
+14 	std::sort(v.begin(), v.end()); // требуется перегрузка оператора < для класса Car
+15
+16 	for (auto &car : v)
+17 		std::cout << car << '\n'; // требуется перегрузка оператора << для класса Car
+18
+19 	return 0;
+20 }
+
+Выдавал следующий результат:
+
+(Ford, Mustang)
+(Ford, Ranger)
+(Renault, Duster)
+(Renault, Logan)
+
+--мой ответ--------------
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+
+class Car
+{
+private:
+	std::string m_company;
+	std::string m_model;
+
+public:
+	Car(std::string company, std::string model)
+		: m_company(company), m_model(model)
+	{
+	}
+
+	friend bool operator== (const Car &c1, const Car &c2);
+	friend bool operator!= (const Car &c1, const Car &c2);
+	friend bool operator< (const Car &c1, const Car &c2);
+	friend std::ostream& operator<< (std::ostream &in, const Car &car);
+};
+
+bool operator== (const Car &c1, const Car &c2)
+{
+	return (c1.m_company == c2.m_company &&
+	c1.m_model == c2.m_model);
+}
+
+bool operator!= (const Car &c1, const Car &c2)
+{
+	return !(c1 == c2);
+}
+
+bool operator< (const Car &c1, const Car &c2){
+	if(c1.m_company<c2.m_company) return true;
+	if(c1.m_model<c2.m_model) return true;
+	return false;
+}
+
+std::ostream& operator<< (std::ostream &in, const Car &car){
+	in <<'(' << car.m_company << ", " << car.m_model << ')';
+	return in;
+}
+
+int main()
+{
+	std::vector<Car> v;
+	v.push_back(Car("Ford", "Mustang"));
+ 	v.push_back(Car("Renault", "Logan"));
+	v.push_back(Car("Ford", "Ranger"));
+	v.push_back(Car("Renault", "Duster"));
+
+	std::sort(v.begin(), v.end()); // требуется перегрузка оператора < для класса Car
+
+	for (auto &car : v)
+		std::cout << car << '\n'; // требуется перегрузка оператора << для класса Car
+
+	return 0;
+}
+
+
+Ответ No 2
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+ 
+class Car
+{
+private:
+	std::string m_company;
+	std::string m_model;
+ 
+public:
+	Car(std::string company, std::string model)
+		: m_company(company), m_model(model)
+	{
+	}
+ 
+	friend bool operator== (const Car &c1, const Car &c2);
+	friend bool operator!= (const Car &c1, const Car &c2);
+	friend std::ostream& operator<< (std::ostream& out, const Car & c)
+	{
+		out << '(' << c.m_company << ", " << c.m_model << ')';
+		return out;
+	}
+ 
+	friend bool operator<(const Car &c1, const Car &c2)
+	{
+		if (c1.m_company < c2.m_company)
+			return true;
+		if (c1.m_company > c2.m_company)
+			return false;
+		if (c1.m_model < c2.m_model)
+			return true;
+		if (c1.m_model > c2.m_model)
+			return false;
+ 
+		return false;
+	}
+};
+ 
+bool operator== (const Car &c1, const Car &c2)
+{
+	return (c1.m_company == c2.m_company &&
+		c1.m_model == c2.m_model);
+}
+ 
+bool operator!= (const Car &c1, const Car &c2)
+{
+	return !(c1 == c2);
+}
+ 
+int main()
+{
+	std::vector<Car> v;
+	v.push_back(Car("Ford", "Mustang"));
+	v.push_back(Car("Renault", "Logan"));
+	v.push_back(Car("Ford", "Ranger"));
+	v.push_back(Car("Renault", "Duster"));
+ 
+	std::sort(v.begin(), v.end()); // требуется перегрузка оператора < для класса Car
+ 
+	for (auto &car : v)
+		std::cout << car << '\n'; // требуется перегрузка оператора << для класса Car
+ 
+	return 0;
+}
