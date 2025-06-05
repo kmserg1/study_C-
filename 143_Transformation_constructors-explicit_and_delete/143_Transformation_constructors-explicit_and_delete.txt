@@ -1,0 +1,259 @@
+Урок No 143. Конструкторы преобразования, ключевые слова explicit и delete
+
+По умолчанию язык C++ обрабатывает любой конструктор, как оператор неявного преобразования. Рассмотрим
+следующую программу:
+
+1 #include <iostream>
+2 #include <cassert>
+3
+4 class Drob
+5 {
+6 private:
+7 	int m_numerator;
+8 	int m_denominator;
+9
+10 public:
+11 	// Конструктор по умолчанию
+12 	Drob(int numerator = 0, int denominator = 1) :
+13 		m_numerator(numerator), m_denominator(denominator)
+14 	{
+15 		assert(denominator != 0);
+16 	}
+17
+18 	// Конструктор копирования
+19 	Drob(const Drob &copy) :
+20 	m_numerator(copy.m_numerator), m_denominator(copy.m_denominator)
+21 	{
+22 		// Нет необходимости выполнять проверку denominator здесь, так как эта проверка уже осуществлена в конструкторе по
+23 		std::cout << "Copy constructor worked here!\n"; // просто, чтобы показать, что это работает
+24 	}
+25
+26 	friend std::ostream& operator<<(std::ostream& out, const Drob &d1);
+27 	int getNumerator() { return m_numerator; }
+28 	void setNumerator(int numerator) { m_numerator = numerator; }
+29 };
+30
+31 std::ostream& operator<<(std::ostream& out, const Drob &d1)
+32 {
+33 	out << d1.m_numerator << "/" << d1.m_denominator;
+34 	return out;
+35 }
+36
+37 Drob makeNegative(Drob d)
+38 {
+39 	d.setNumerator(-d.getNumerator());
+40 	return d;
+41 }
+42
+43 int main()
+44 {
+45 	std::cout << makeNegative(7); // передаем целочисленное значение
+46
+47 	return 0;
+48 }
+
+Хотя функция makeNegative() ожидает объект класса Drob, мы передаем ей целочисленный литерал 7. Поскольку у класса
+Drob есть конструктор, который может принимать одно целочисленное значение (конструктор по умолчанию), то
+компилятор выполнит неявную конвертацию литерала 7 в объект класса Drob. Это делается путем выполнения
+копирующей инициализации параметра d функции makeNegative() с помощью конструктора Drob(int, int).
+
+Результат выполнения программы:
+Copy constructor worked here!
+-7/1
+
+Неявное преобразование работает для всех видов инициализации (прямой, uniform и копирующей).
+Конструкторы, которые используются в неявных преобразованиях, называются конструкторами преобразования (или
+«конструкторами конвертации»). До C++11 конструкторами преобразования могли быть конструкторы только с одним
+параметром. Однаков C++11 это ограничение было снято (наряду с добавлением uniform-инициализации), и конструкторы,
+имеющие несколько параметров, также уже могут быть конструкторами преобразования.
+
+
+Ключевое слово explicit
+
+Иногда выполнение неявных преобразований может иметь смысл, а иногда может быть крайне нежелательным и
+генерировать неожиданные результаты:
+
+1 #include <iostream>
+2 #include <string>
+3
+4 class SomeString
+5 {
+6 private:
+7 	std::string m_string;
+8 public:
+9 	SomeString(int a) // выделяем строку размером a
+10 	{
+11 		m_string.resize(a);
+12 	}
+13
+14 	SomeString(const char *string) // выделяем строку для хранения значения типа string
+15 	{
+16 		m_string = string;
+17 	}
+18
+19 	friend std::ostream& operator<<(std::ostream& out, const SomeString &s);
+20
+21 };
+22
+23 std::ostream& operator<<(std::ostream& out, const SomeString &s)
+24 {
+25 	out << s.m_string;
+26 	return out;
+27 }
+28
+29 int main()
+30 {
+31 	SomeString mystring = 'a'; // выполняется копирующая инициализация
+32 	std::cout << mystring;
+33 	return 0;
+34 }
+
+В примере, приведенном выше, мы пытаемся инициализировать строку одним символом типа char. Поскольку
+переменные типа char являются частью семейства целочисленных типов, то компилятор будет использовать конструктор
+преобразования SomeString(int) для неявного преобразования символа типа char в тип SomeString. В результате
+переменная типа char будет конвертирована в тип int. А это не совсем то, что ожидается.
+Один из способов решения этой проблемы — сделать конструктор явным, используя ключевое слово explicit (которое
+пишется перед именем конструктора). Явные конструкторы (с ключевым словом explicit) не используются для неявных
+конвертаций:
+
+1 #include <iostream>
+2 #include <string>
+3
+4 class SomeString
+5 {
+6 private:
+7 	std::string m_string;
+8 public:
+9 	// Ключевое слово explicit делает этот конструктор закрытым для выполнения любых неявных преобразований
+10 	explicit SomeString(int a) // выделяем строку размером a
+11 	{
+12 		m_string.resize(a);
+13 	}
+14
+15 	SomeString(const char *string) // выделяем строку для хранения значения типа string
+16      {
+17 		m_string = string;
+18 	}
+19
+20 	friend std::ostream& operator<<(std::ostream& out, const SomeString &s);
+21
+22 };
+23
+24 std::ostream& operator<<(std::ostream& out, const SomeString &s)
+25 {
+26 	out << s.m_string;
+27 	return out;
+28 }
+29
+30 int main()
+31 {
+32 	SomeString mystring = 'a'; // ошибка компиляции, поскольку SomeString(int) теперь является explicit и, соответственно, недоступен, а другого подходящего конструктора для преобразования компилятор не видит
+33 	std::cout << mystring;
+34      return 0;
+35 }
+
+Вышеприведенная программа не скомпилируется, так как SomeString(int) мы сделали явным, а другого конструктора
+преобразования, который выполнил бы неявную конвертацию 'a' в SomeString, компилятор просто не нашел.
+Однако использование явного конструктора только предотвращает выполнение неявных преобразований. Явные
+конвертации (через операторы явного преобразования) по-прежнему разрешены:
+1 std::cout << static_cast<SomeString>(7); // разрешено: явное преобразование 7 в SomeString через оператор static_cast
+
+При прямой- или uniform-инициализации неявная конвертация также будет выполняться:
+1 SomeString str('a'); // разрешено
+
+Правило: Для предотвращения возникновения ошибок с неявными конвертациями делайте ваши конструкторы
+явными, используя ключевое слово explicit.
+
+
+Ключевое слово delete
+
+Еще одним способом запретить конвертацию 'a' в SomeString (неявным или явным способом) является добавление
+закрытого конструктора SomeString(char) :
+
+1 #include <iostream>
+2 #include <string>
+3
+4 class SomeString
+5 {
+6 private:
+7 	std::string m_string;
+8	// объекты типа SomeString(char) не могут быть созданы вне класса
+9 	SomeString(char)
+10 	{
+11 	}
+12 public:
+13 	// Ключевое слово explicit делает этот конструктор закрытым для выполнения любых неявных конвертаций
+14 	explicit SomeString(int a) // выделяем строку размером a
+15 	{
+16 		m_string.resize(a);
+17 	}
+18
+19 	SomeString(const char *string) // выделяем строку для хранения значения типа string
+20 	{
+21 		m_string = string;
+22 	}
+23
+24 	friend std::ostream& operator<<(std::ostream& out, const SomeString &s);
+25
+26 };
+27
+28 std::ostream& operator<<(std::ostream& out, const SomeString &s)
+29 {
+30 out << s.m_string;
+31 return out;
+32 }
+33
+34 int main()
+35 {
+36 	SomeString mystring('a'); // ошибка компиляции, поскольку SomeString(char) является private
+37 	std::cout << mystring;
+38 	return 0;
+39 }
+
+Тем не менее, этот конструктор все еще может использоваться внутри класса (private закрывает доступ к данным только для
+объектов вне тела класса).
+
+Лучшее решение — использовать ключевое слово delete (добавленное в C++11) для удаления этого конструктора:
+
+1 #include <iostream>
+2 #include <string>
+3
+4 class SomeString
+5 {
+6 private:
+7 	std::string m_string;
+8
+9 public:
+10 	SomeString(char) = delete; // любое использование этого конструктора приведет к ошибке
+11
+12 	// Ключевое слово explicit делает этот конструктор закрытым для выполнения любых неявных конвертаций
+13 	explicit SomeString(int a) // выделяем строку размером a
+14 	{
+15 		m_string.resize(a);
+16 	}
+17
+18 	SomeString(const char *string) // выделяем строку для хранения значения типа string
+19 	{
+20 		m_string = string;
+21 	}
+22
+23 	friend std::ostream& operator<<(std::ostream& out, const SomeString &s);
+24
+25 };
+26
+27 std::ostream& operator<<(std::ostream& out, const SomeString &s)
+28 {
+29 	out << s.m_string;
+30 	return out;
+31 }
+32
+33 int main()
+34 {
+35 	SomeString mystring('a'); // ошибка компиляции, поскольку SomeString(char) удален
+36 	std::cout << mystring;
+37 	return 0;
+38 }
+
+После удаления функции, любое её использование вызовет ошибку компиляции.
+Обратите внимание, конструктор копирования и перегруженные операторы также могутбыть удалены с помощью delete
+для предотвращения их использования.

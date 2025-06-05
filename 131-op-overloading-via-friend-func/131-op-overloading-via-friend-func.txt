@@ -45,13 +45,13 @@
 3 class Dollars
 4 {
 5 private:
-6 int m_dollars;
+6 	int m_dollars;
 7
 8 public:
-9 Dollars(intdollars) { m_dollars=dollars;}
+9 	Dollars(int dollars) { m_dollars=dollars;}
 10
-11 //Выполняем Dollars + Dollarsчерез дружественную функцию
-12 friend Dollars operator+(const Dollars &d1,const Dollars &d2);
+11 //Выполняем Dollars + Dollars через дружественную функцию
+12 	friend Dollars operator+(const Dollars &d1,const Dollars &d2);
 13
 14 int getDollars() const {return m_dollars; }
 15 };
