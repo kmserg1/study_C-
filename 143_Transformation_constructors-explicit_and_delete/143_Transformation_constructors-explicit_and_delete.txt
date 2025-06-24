@@ -22,7 +22,7 @@
 17
 18 	// Конструктор копирования
 19 	Drob(const Drob &copy) :
-20 	m_numerator(copy.m_numerator), m_denominator(copy.m_denominator)
+20 		m_numerator(copy.m_numerator), m_denominator(copy.m_denominator)
 21 	{
 22 		// Нет необходимости выполнять проверку denominator здесь, так как эта проверка уже осуществлена в конструкторе по
 23 		std::cout << "Copy constructor worked here!\n"; // просто, чтобы показать, что это работает

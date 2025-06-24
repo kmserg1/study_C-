@@ -67,10 +67,10 @@
 Задание No 1
 Предположим, что Square — это класс, а square — это объект этого класса. Какой способ перегрузки лучше использовать
 для следующих операторов?
- square + square
- -square
- std::cout << square
- square = 7;
+ square + square (friend)
+ -square (метод класса)
+ std::cout << square (метод класса)
+ square = 7; (метод класса)
 
 Ответ No 1
 
@@ -115,11 +115,86 @@ a) Следующий код функции main():
 7
 7
 
-Ответ No2.а)
+-------
+
+#include <iostream>
+
+class Average{
+private:
+	int32_t m_sum;
+	int8_t m_quantity;
+public:
+	Average(int32_t a=0) : m_sum(a), m_quantity(0)
+	{
+	}
+	void print()
+	{
+			std::cout << "Numbers cuontity: " << m_quantity << ", Average value: " << (m_quantity<=0)?0:m_sum/m_quantity << '\n';
+	}
+
+	void add()
+	{
+		int i;
+		std::cout << "Enter int number:";
+		std::cin >> i;
+		++m_quantity;
+		m_sum+=i;
+	}
+
+	Average& operator+=(int i)
+	{
+		++m_quantity;
+		m_sum+=i;
+		return *this;
+	}
+
+	friend std::ostream& operator<<(std::ostream &o, const Average &a);
+
+};
+
+std::ostream& operator<<(std::ostream &o, const Average &a)
+{
+	o << "Numbers quantity: " << static_cast<int>(a.m_quantity) << ", Average value: " << a.m_sum/a.m_quantity << '\n';
+	return o;
+}
+
+
+
+
+//a) Следующий код функции main(): 
+
+int main()
+{
+	Average avg;
+	
+	avg += 5;
+	std::cout << avg << '\n'; // 5 / 1 = 5
+	
+	avg += 9;
+	std::cout << avg << '\n'; // (5 + 9) / 2 = 7
+ 
+	avg += 19;
+	std::cout << avg << '\n'; // (5 + 9 + 19) / 3 = 11
+ 
+	avg += -9;
+	std::cout << avg << '\n'; // (5 + 9 + 19 - 9) / 4 = 6
+ 
+	(avg += 7) += 11; // выполнение цепочки операций
+	std::cout << avg << '\n'; // (5 + 9 + 19 - 9 + 7 + 11) / 6 = 7
+ 
+	Average copy = avg;
+	std::cout << copy << '\n';
+ 
+	return 0;
+}
+
+
+Ответ No 2.а)
 
 b) Требуется ли этому классу явный конструктор копирования или оператор присваивания?
+Нет
 
-ОтветNo2.b)
+Ответ No 2.b)
 
 
 Задание No 3
@@ -133,7 +208,7 @@ b) Требуется ли этому классу явный конструкт
 2
 3 IntArray fillArray()
 4 {
-5 	IntArraya(6);
+5 	IntArray a(6);
 6 	a[0]=6;
 7 	a[1]=7;
 8 	a[2]=3;
@@ -165,11 +240,14 @@ b) Требуется ли этому классу явный конструкт
 Ответ No 3
 
 
+
 Задание No 4
-Значение типа с плавающей точкой — это число с десятичной дробью, где количество цифр после точки (дробная часть)
-может меняться. Значениет ипа с фиксированной точкой — это число с дробью, где дробь (после точки) фиксированная.
+
+Значение с плавающей точкой — это число с десятичной дробью, где количество цифр после точки (дробная часть)
+может меняться. Значение с фиксированной точкой — это число с дробью, где количество цифр после точки постоянно.
+
 Вам нужно написать класс для реализации значений типа с фиксированной точкой с двумя цифрами после точки
-(например, 11.47, 5.00 или 1465.78). Диапазон класса должен быть от -32768.99 до32767.99, в дробной части могут
+(например, 11.47, 5.00 или 1465.78). Диапазон класса должен быть от -32768.99 до 32767.99, в дробной части могут
 быть любые две цифры, не допускайте проблем с точностью.
 
 a) Какого типа данных переменную-член следует использовать для реализации значений типа с фиксированной точкой с 
@@ -301,4 +379,314 @@ You entered:5.68
 создания анонимного объекта класса FixedPoint, а затем присвойте этот объект параметру функции перегрузки
 оператора >>.
 
+/*
+написать класс для реализации значений типа с фиксированной точкой с двумя цифрами после точки
+(например, 11.47, 5.00 или 1465.78). Диапазон класса должен быть от -32768.99 до 32767.99, в дробной части могут
+быть любые две цифры, не допускайте проблем с точностью.
+*/
+
+#include <iostream>
+#include <cassert>
+#include <cmath>
+
+class Fixed2{
+private:
+	int16_t m_int;
+	int8_t m_frac;
+	const int8_t m_frac_limit{100};
+	const int16_t m_int_limit{32767};
+	
+public:
+	Fixed2(int16_t int_part=0, int8_t frac_part=0): m_int(int_part),m_frac(frac_part)
+	{
+		assert(m_frac > -m_frac_limit && m_frac < m_frac_limit);
+		assert(m_int >= -m_int_limit-1 && m_int <= m_int_limit);
+	}
+
+        Fixed2(double a)
+	{
+		m_int=static_cast<int16_t>(round(a));
+		m_frac=static_cast<int8_t>(round((a-round(a))*100));
+
+	}
+
+
+	void print()
+	{
+		std::cout << static_cast<int>(m_int) <<'.' << static_cast<int>(m_frac) << '\n';
+	}
+
+	Fixed2 operator-() const
+	{
+		Fixed2 a(-m_int,m_frac);
+		return a;
+	}
+
+	Fixed2& operator= (const Fixed2 &a)
+	{
+		if (this == &a) // Проверка на самоприсваивание
+			return *this;
+		m_int=a.m_int;
+		m_frac=a.m_frac;
+		return *this;
+	}
+	
+	operator double()
+	{
+		double a{static_cast<double>(m_int)};
+		a+=static_cast<double>(m_frac)/100;
+		return a;
+	}
+
+	friend std::ostream& operator<< (std::ostream &out, Fixed2 &first);
+	friend std::istream& operator>> (std::istream &in, Fixed2 &first);
+	friend Fixed2 operator+ (const Fixed2 &first, const Fixed2 &second);
+	friend Fixed2 operator- (const Fixed2 &first, const Fixed2 &second);
+	friend Fixed2 operator* (Fixed2 &first,Fixed2 &second);
+	friend Fixed2 operator/ (Fixed2 &first,Fixed2 &second);
+	friend bool operator== (const Fixed2 &a, const Fixed2 &b);
+/*
+Fixed2 operator+= (Fixed2 &first);
+Fixed2 operator-= (Fixed2 &first);
+Fixed2 operator*= (Fixed2 &first);
+Fixed2 operator/= (Fixed2 &first);
+*/
+};
+
+
+bool operator== (const Fixed2 &a, const Fixed2 &b)
+{
+	return ((a.m_int==b.m_int) && (a.m_frac==b.m_frac));
+}
+
+std::istream& operator>> (std::istream &in, Fixed2 &first)
+{
+	double a;
+	in>>a;
+	first.m_int=round(a);
+	first.m_frac=round((a-round(a))*100);
+//	assert(first.m_int<=-first.m_int_limit-1 && first.m_int>=first.m_int_limit);
+	return  in;
+}
+
+
+
+
+std::ostream& operator<< (std::ostream &out, Fixed2 &first)
+{
+	
+	if(first.m_int>=0 && first.m_frac>=0 ) //невід'ємні частини числа, мінусу у виводі нема
+	{
+		if(abs(first.m_frac<10))
+			out << static_cast<int>(first.m_int) <<".0" << static_cast<int>(first.m_frac);
+		else
+			out << static_cast<int>(first.m_int) <<'.' << static_cast<int>(first.m_frac);
+	}
+	else //є хоч одна від'ємна частина, мінусу у виводі є
+	{
+		out << '-';
+		if(abs(static_cast<int>(first.m_frac))<10) //якщо дробова частина менше 10, то виводимо 0 перед нею
+			out << abs(static_cast<int>(first.m_int)) <<".0" << abs(static_cast<int>(first.m_frac));
+		else
+			out << abs(static_cast<int>(first.m_int)) <<'.' << abs(static_cast<int>(first.m_frac));
+	}
+
+	return out;
+}
+                                                
+Fixed2 operator+ (const Fixed2 &first,const Fixed2 &second)
+{
+	assert(first.m_int+second.m_int >= -first.m_int_limit-1 && first.m_int+second.m_int <= first.m_int_limit);
+	Fixed2 a;
+	a.m_int=first.m_int+second.m_int;
+	a.m_frac=first.m_frac-second.m_frac;
+	if(a.m_frac<100)
+	{
+		a.m_int-=1;
+		a.m_frac+=100;
+	}
+	if(a.m_frac>100)
+	{
+		a.m_int+=1;
+		a.m_frac-=100;
+	}
+
+	return a;
+}
+
+Fixed2 operator- (const Fixed2 &first,const Fixed2 &second)
+{
+	Fixed2 a;
+	a=first+(-second);
+	return a;
+}
+
+Fixed2 operator* (Fixed2 &first,Fixed2 &second)
+{
+	Fixed2 a;
+	double dfirst(static_cast<double>(first));
+	double dsecond(static_cast<double>(second));
+	double c(dfirst*dsecond);
+	a=static_cast<Fixed2>(c);
+	return a;
+}
+
+Fixed2 operator/ (Fixed2 &first,Fixed2 &second)
+{
+	Fixed2 a;
+	double dfirst(static_cast<double>(first));
+	double dsecond(static_cast<double>(second));
+	double c(dfirst/dsecond);
+	a=static_cast<Fixed2>(c);
+	return a;
+}
+
+void SomeTest()
+{
+	std::cout << std::boolalpha;
+	std::cout <<(Fixed2(0.75) + Fixed2(1.23)== Fixed2(1.98))<< '\n'; //обазначенияположительные, никакого
+	std::cout <<(Fixed2(0.75) + Fixed2(1.50)== Fixed2(2.25))<< '\n'; //обазначенияположительные, переполн
+	std::cout <<(Fixed2(-0.75)+Fixed2(-1.23)== Fixed2(-1.98)) <<'\n';// оба значения отрицательные,никак
+	std::cout <<(Fixed2(-0.75)+Fixed2(-1.50)== Fixed2(-2.25)) <<'\n';// оба значения отрицательные,переп
+	std::cout <<(Fixed2(0.75) + Fixed2(-1.23) ==Fixed2(-0.48))<< '\n'; //второе значение отрицательное,ник
+	std::cout <<(Fixed2(0.75) + Fixed2(-1.50) ==Fixed2(-0.75))<< '\n'; //второе значение отрицательное,воз
+	std::cout <<(Fixed2(-0.75)+Fixed2(1.23) ==Fixed2(0.48)) <<'\n';// первоезначениеотрицательное, ника
+	std::cout <<(Fixed2(-0.75)+Fixed2(1.50) ==Fixed2(0.75)) <<'\n';// первоезначениеотрицательное, возм
+}
+
+
+int main()
+{
+//	SomeTest();
+	Fixed2 a(-0.75);
+	Fixed2 b(1.23);
+	Fixed2 c(1.25);
+	Fixed2 e;
+	bool res;
+	e=a+b;
+	res=(c==e);
+	std::cout << std::boolalpha;
+	std::cout << res <<'\n';
+	std::cout << -a << '\n';
+	std::cout << "Enter a number:"; //введите 5.678
+	std::cin >> a;
+	std::cout << "You entered: " << a << '\n';
+	return 0;
+}
+
+
+
+
+
 Ответ No 4.d)
+
+
+
+#include <iostream>
+#include <cstdint> // для целочисленных значений фиксированного размера
+#include <cmath> // для функции round()
+ 
+class FixedPoint
+{
+private:
+	std::int16_t m_base; // это целая часть нашего значения
+	std::int8_t m_decimal; // это дробная часть нашего значения
+ 
+public:
+	FixedPoint(std::int16_t base = 0, std::int8_t decimal = 0)
+		: m_base(base), m_decimal(decimal)
+	{
+		// Здесь нужно обработать случай, когда дробная часть > 99 или < -99, но это вы должны будете сделать самостоятельно
+ 
+		// Если дробная или целая части значения отрицательные
+		if (m_base < 0.0 || m_decimal < 0.0)
+		{
+			// Проверяем целую часть
+			if (m_base > 0.0)
+				m_base = -m_base;
+			// Проверяем дробную часть
+			if (m_decimal > 0.0)
+				m_decimal = -m_decimal;
+		}
+	}
+ 
+	FixedPoint(double d)
+	{
+		// Сначала нам нужно получить целую часть значения.
+		// Мы можем сделать это, конвертируя наше число типа double в число типа int
+		m_base = static_cast<int16_t>(d); // отбрасывается дробная часть
+ 
+		// Теперь нам нужно получить дробную часть нашего значения:
+		// 1) d - m_base оставляет только дробную часть,
+		// 2) которую затем мы можем умножить на 100, переместив две цифры из дробной части в целую часть значения
+		// 3) теперь мы можем это дело округлить
+		// 4) и, наконец, конвертировать в тип int, чтобы отбросить любую дополнительную дробь
+		m_decimal = static_cast<std::int8_t>(round((d - m_base) * 100));
+	}
+ 
+	operator double() const
+	{
+		return m_base + static_cast<double>(m_decimal) / 100;
+	}
+ 
+	friend bool operator==(const FixedPoint &fp1, const FixedPoint &fp2)
+	{
+		return (fp1.m_base == fp2.m_base && fp1.m_decimal == fp2.m_decimal);
+	}
+ 
+	friend std::ostream& operator<<(std::ostream &out, const FixedPoint &fp)
+	{
+		out << static_cast<double>(fp);
+		return out;
+	}
+ 
+	friend std::istream& operator >> (std::istream &in, FixedPoint &fp)
+	{
+		double d;
+		in >> d;
+		fp = FixedPoint(d);
+ 
+		return in;
+	}
+ 
+	friend FixedPoint operator+(const FixedPoint &fp1, const FixedPoint &fp2)
+	{
+		return FixedPoint(static_cast<double>(fp1) + static_cast<double>(fp2));
+	}
+ 
+	FixedPoint operator-()
+	{
+		return FixedPoint(-m_base, -m_decimal);
+	}
+ 
+};
+ 
+void SomeTest()
+{
+	std::cout << std::boolalpha;
+	std::cout << (FixedPoint(0.75) + FixedPoint(1.23) == FixedPoint(1.98)) << '\n'; // оба значения положительные, никакого переполнения
+	std::cout << (FixedPoint(0.75) + FixedPoint(1.50) == FixedPoint(2.25)) << '\n'; // оба значения положительные, переполнение
+	std::cout << (FixedPoint(-0.75) + FixedPoint(-1.23) == FixedPoint(-1.98)) << '\n'; // оба значения отрицательные, никакого переполнения
+	std::cout << (FixedPoint(-0.75) + FixedPoint(-1.50) == FixedPoint(-2.25)) << '\n'; // оба значения отрицательные, переполнение
+	std::cout << (FixedPoint(0.75) + FixedPoint(-1.23) == FixedPoint(-0.48)) << '\n'; // второе значение отрицательное, никакого переполнения
+	std::cout << (FixedPoint(0.75) + FixedPoint(-1.50) == FixedPoint(-0.75)) << '\n'; // второе значение отрицательное, возможно переполнение
+	std::cout << (FixedPoint(-0.75) + FixedPoint(1.23) == FixedPoint(0.48)) << '\n'; // первое значение отрицательное, никакого переполнения
+	std::cout << (FixedPoint(-0.75) + FixedPoint(1.50) == FixedPoint(0.75)) << '\n'; // первое значение отрицательное, возможно переполнение
+}
+ 
+int main()
+{
+	SomeTest();
+ 
+	FixedPoint a(-0.48); 
+	std::cout << a << '\n';
+ 
+	std::cout << -a << '\n';
+ 
+	std::cout << "Enter a number: "; // введите 5.678
+	std::cin >> a;
+	
+	std::cout << "You entered: " << a << '\n';
+ 
+	return 0;
+}
