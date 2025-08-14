@@ -1,0 +1,29 @@
+a) Сначала создайте класс Creature со следующими членами:
+ имя (std::string);
+ символ (char);
+ количество здоровья (int);
+ количество урона, которое он наносит врагу во время атаки (int);
+ количество золота, которое они меет(int).
+
+Создайте полный набор геттеров (по одному на каждую переменную-член класса). Добавьте еще три метода:
+ void reduceHealth (int) — уменьшает здоровье Creature на указанное целочисленное значение;
+ bool isDead() — возвращает true, если здоровье Creature равно 0  или меньше;
+ void addGold(int) — добавляет золото Creature-у.
+
+Следующий код:
+
+1 #include <iostream>
+2 #include <string>
+3
+4 int main()
+5 {
+6 	Creature o("orc", 'o',4,2,10);
+7 	o.addGold(5);
+8
+9 	std::cout << "The "<<o.getName()<<"has "<<o.getHealth()<<" healthand is carrying "<< o.getGold() << "gold."
+10 	o.reduceHealth(1);
+11 	return 0;
+12 }
+
+Должен выдавать следующий результат:
+The orc has 3 health and is carrying 15 gold.

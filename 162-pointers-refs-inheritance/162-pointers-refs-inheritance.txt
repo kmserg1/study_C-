@@ -1,0 +1,467 @@
+Урок No162. Указатели, Ссылки и Наследование
+
+
+На предыдущих уроках мы рассматривали использование наследования для полученияновых классов и зсуществующих. На
+уроках в этой главе мы сосредоточимся на одном из самых важных и мощных аспектов наследования — виртуальных
+функциях. Но, прежде чеммы перейдем к изучению виртуальных функций, давайте сначала определимся, зачем это вообще
+нам нужно.
+
+Оглавление:
+1. Указатели, ссылки и дочерние классы
+2. Указатели, ссылки и родительские классы
+3. Тест
+
+
+Указатели, ссылки и дочерние классы
+Из урока No155 мы знаем, что при создании объекта дочернего класса выполняется построение двух частей, из которых этот
+объект и состоит: родительская и дочерняя. Например:
+
+1 class Parent
+2 {
+3 protected:
+4 	int m_value;
+5
+6 public:
+7 	Parent(int value)
+8 		: m_value(value)
+9 	{
+10 	}
+11
+12 	const char* getName() { return "Parent"; }
+13 	int getValue() { return m_value; }
+14 };
+15
+16 class Child: public Parent
+17 {
+18 public:
+19 	Child(int value)
+20 		: Parent(value)
+21 	{
+22 	}
+23
+24 	const char* getName() { return "Child"; }
+25 i	nt getValueDoubled() { return m_value * 2; }
+26 };
+
+При создании объекта класса Child сначала выполняется построение части Parent, а затем уже части Child. Помните, что тип
+отношений в наследовании — «является». Поскольку Child «является» Parent, то логично, что Child содержит часть Parent.
+Мы можем дать команду указателям и ссылкам класса Child указывать на другие объекты класса Child:
+
+1 #include <iostream>
+2
+3 int main()
+4 {
+5 	Child child(7);
+6 	std::cout << "child is a " << child.getName() << " and has value " << child.getValue() << '\n';
+7
+8 	Child &rChild = child;
+9 	std::cout << "rChild is a " << rChild.getName() << " and has value " << rChild.getValue() << '\n';
+10
+11 	Child *pChild = &child;
+12 	std::cout << "pChild is a " << pChild->getName() << " and has value " << pChild->getValue() << '\n';
+13
+14 	return 0;
+15 }
+
+Результат:
+child is a Child and has value 7
+rChild is a Child and has value 7
+pChild is a Child and has value 7
+
+Интересно, поскольку Child имеет часть Parent, то можем ли мы дать команду указателю или ссылке класса Parent указывать на
+объект класса Child? Оказывается, можем!
+
+1 #include <iostream>
+2
+3 int main()
+4 {
+5 	Child child(7);
+6
+7 	// Всё корректно!
+8 	Parent &rParent = child;
+9 	Parent *pParent = &child;
+10
+11 	std::cout << "child is a " << child.getName() << " and has value " << child.getValue() << '\n';
+12 	std::cout << "rParent is a " << rParent.getName() << " and has value " << rParent.getValue() << '\n';
+13 	std::cout << "pParent is a " << pParent->getName() << " and has value " << pParent->getValue() << '\n';
+14
+15 	return 0;
+16 }
+
+Результат:
+child is a Child and has value 7
+rParent is a Parent and has value 7
+pParent is a Parent and has value 7
+
+Ноэто может быть не совсем то,что вы ожидали увидеть!
+Поскольку rParent и pParent являются ссылкой и указателем класса Parent, то они могут видеть только члены класса Parent
+(и члены любых других классов, которые наследует Parent). Таким образом, указатель/ссылка класса Parent не может увидеть
+Child::getName(). Следовательно, вызывается Parent::getName(), а rParent и pParent сообщают, что они относятся к классу
+Parent,а не к классу Child.
+
+Обратите внимание, это также означает, что невозможно вызвать Child::getValueDoubled() через rParent или pParent. Они
+не могут видеть что-либо в классе Child.
+
+Вот еще один более сложный пример:
+		   
+1 #include <iostream>
+2 #include <string>
+3
+4 class Animal
+5 {
+6 protected:
+7 	std::string m_name;
+8
+9 	// Мы делаем этот конструктор protected так как не хотим, чтобы пользователи создавали объекты класса Animal напрямую,
+10 	// но хотим, чтобы у дочерних классов доступ был открыт
+11 	Animal(std::string name)
+12 		: m_name(name)
+13 	{
+14 	}
+15
+16 public:
+17 	std::string getName() { return m_name; }
+18 	const char* speak() { return "???"; }
+19 };
+20
+21 class Cat: public Animal
+22 {
+23 public:
+24 	Cat(std::string name)
+25 		: Animal(name)
+26 	{
+27 	}
+28
+29 	const char* speak() { return "Meow"; }
+30 };
+31
+32 class Dog: public Animal
+33 {
+34 public:
+35 	Dog(std::string name)
+36 	: Animal(name)
+37 	{
+38 	}
+39
+40 	const char* speak() { return "Woof"; }
+41 };
+42
+43 int main()
+44 {
+45 	Cat cat("Matros");
+46 	std::cout << "cat is named " << cat.getName() << ", and it says " << cat.speak() << '\n';
+47
+48 	Dog dog("Barsik");
+49 	std::cout << "dog is named " << dog.getName() << ", and it says " << dog.speak() << '\n';
+50
+51 	Animal *pAnimal = &cat;
+52 	std::cout << "pAnimal is named " << pAnimal->getName() << ", and it says " << pAnimal->speak() << '\n';
+53
+54 	pAnimal = &dog;
+55 	std::cout << "pAnimal is named " << pAnimal->getName() << ", and it says " << pAnimal->speak() << '\n';
+56
+57 	return 0;
+58 }
+
+Результат выполнения программы:
+
+cat is named Matros, and it says Meow
+dog is named Barsik, and it says Woof
+pAnimal is named Matros, and it says ???
+pAnimal is named Barsik, and it says ???
+
+Мы видим здесь ту же проблему. Поскольку pAnimal является указателем типа Animal, то он может видеть только часть Animal.
+Следовательно, pAnimal->speak() вызывает Animal::speak(), а не Dog::Speak() или Cat::speak().
+
+
+Указатели, ссылки и родительские классы
+
+Теперь вы можете сказать: «Примеры, приведенные выше, кажутся глупыми. Почему я должен использовать указатель или
+ссылку родительского класса на объект дочернего класса, если я могу просто использовать дочерний объект?». Оказывается,
+на это есть несколько веских причин.
+Во-первых, предположим, что вы хотите написать функцию, которая выводит имя и звук животного. Без использования
+указателя на родительский класс, вам придется реализовать это через перегрузку функций. Например:
+
+1 void report(Cat &cat)
+2 {
+3 	std::cout << cat.getName() << " says " << cat.speak() << '\n';
+4 }
+5
+6 void report(Dog &dog)
+7 {
+8 	std::cout << dog.getName() << " says " << dog.speak() << '\n';
+9 }
+
+Не слишком сложно, но представьте, что у нас 30 разных типов животных. Нам пришлось бы написать 30 перегрузок! Кроме
+того, если вы когда-либо добавите новый тип животных, то вам также придется написать новую функцию для этого типа
+животных. Это огромная трата времени.
+Однако, поскольку Cat и Dog наследуют Animal, Cat и Dog имеют часть Animal, поэтому мы можем сделать следующее
+
+1 void report(Animal &rAnimal)
+2 {
+3 	std::cout << rAnimal.getName() << " says " << rAnimal.speak() << '\n';
+4 }
+
+Это позволит нам передавать любой класс, который является дочерним классу Animal! Вместо отдельного метода на каждый
+дочерний класс мы записали один метод, который работает сразу со всеми дочерними классами!
+
+Проблема, конечно, в том, что, поскольку rAnimal является ссылкой класса Animal, то rAnimal.speak() вызовет
+Animal::speak() вместо метода speak() дочернего класса.
+
+Во-вторых, допустим, у нас есть 3 кошки и 3 собаки, которых мы бы хотели сохранить в массиве для легкого доступа к ним.
+Поскольку массивы могут содержать объекты только одного типа, то без указателей/ссылок на родительский класс, нам бы
+пришлось создавать отдельный массив для каждого дочернего класса. Например:
+
+1 #include <iostream>
+2
+3 int main()
+4 {
+5 Cat cats[] = { Cat("Matros"), Cat("Ivan"), Cat("Martun") };
+6 Dog dogs[] = { Dog("Barsik"), Dog("Tolik"), Dog("Tyzik") };
+7
+8 for (int iii=0; iii < 3; ++iii)
+9 std::cout << cats[iii].getName() << " says " << cats[iii].speak() << '\n';
+10
+11 for (int iii=0; iii < 3; ++iii)
+12 std::cout << dogs[iii].getName() << " says " << dogs[iii].speak() << '\n';
+13
+14 return 0;
+15 }
+
+Теперь представьте, что у нас 30 разных типов животных. Нам пришлось бысоздать 30 массивов — по одному на каждый тип
+животного!
+
+Однако, поскольку Cat и Dog наследуют Animal, то можно сделать следующее:
+
+1 #include <iostream>
+2
+3 int main()
+4 {
+5 	Cat matros("Matros"), ivan("Ivan"), martun("Martun");
+6 	Dog barsik("Barsik"), tolik("Tolik"), tyzik("Tyzik");
+7
+8 	// Создаем массив указателей на наши объекты Cat и Dog
+9 	Animal *animals[] = { &matros, &ivan, &martun, &barsik, &tolik, &tyzik};
+10 	for (int iii=0; iii < 6; ++iii)
+11 		std::cout << animals[iii]->getName() << " says " << animals[iii]->speak() << '\n';
+12
+13 	return 0;
+14 }
+
+Хотя это скомпилируется и выполнится, но, к сожалению, тот факт, что каждый элемент массива animals является указателем
+на Animal, означает, что animals[iii]->speak() будет вызывать Animal::speak(), вместо методов speak() дочерних классов.
+Хотя оба этих способа могут сэкономить нам много времени и энергии, они имеют одну и туже проблему: указатель или
+ссылка родительского класса вызывает родительскую версию функции, а не дочернюю. Если бы был какой-то способ заставить
+родительские указатели вызывать методы дочерних классов.
+Угадайте теперь, зачем нужны виртуальные функции?
+
+Тест
+
+Наш пример с Animal/Cat/Dog не работает так, как мы хотим,потому что ссылка/указатель класса Animal не может получить
+доступ к методам speak() дочерних классов. Один из способов обойти эту проблему — сделать так, чтобы данные возвращаемые 
+методом speak(), стали доступными в виде родительской части класса Animal (так же, как name класса Animal
+доступен через член m_name ).
+Обновите классы Animal, Cat и Dog в коде, приведенном выше, добавив новый член m_speak в класс Animal. Инициализируйте
+его соответствующим образом. Следующая программа должна работать корректно:
+
+1 #include <iostream>
+2
+3 int main()
+4 {
+5 	Cat matros("Matros"), ivan("Ivan"), martun("Martun");
+6 	Dog barsik("Barsik"), tolik("Tolik"), tyzik("Tyzik");
+7
+8 	// Создаем массив указателей на наши объекты Cat и Dog
+9 	Animal *animals[] = { &matros, &ivan, &martun, &barsik, &tolik, &tyzik};
+10 	for (int iii=0; iii < 6; iii++)
+11 		std::cout << animals[iii]->getName() << " says " << animals[iii]->speak() << '\n';
+12
+13 	return 0;
+14 }
+
+
+
+1 #include <iostream>
+2 #include <string>
+3
+4 class Animal
+5 {
+6 protected:
+7 	std::string m_name;
+8
+9 	// Мы делаем этот конструктор protected так как не хотим, чтобы пользователи создавали объекты класса Animal напрямую,
+10 	// но хотим, чтобы у дочерних классов доступ был открыт
+11 	Animal(std::string name)
+12 		: m_name(name)
+13 	{
+14 	}
+15
+16 public:
+17 	std::string getName() { return m_name; }
+18 	const char* speak() { return "???"; }
+19 };
+20
+21 class Cat: public Animal
+22 {
+23 public:
+24 	Cat(std::string name)
+25 		: Animal(name)
+26 	{
+27 	}
+28
+29 	const char* speak() { return "Meow"; }
+30 };
+31
+32 class Dog: public Animal
+33 {
+34 public:
+35 	Dog(std::string name)
+36 	: Animal(name)
+37 	{
+38 	}
+39
+40 	const char* speak() { return "Woof"; }
+41 };
+42
+43 int main()
+44 {
+45 	Cat cat("Matros");
+46 	std::cout << "cat is named " << cat.getName() << ", and it says " << cat.speak() << '\n';
+47
+48 	Dog dog("Barsik");
+49 	std::cout << "dog is named " << dog.getName() << ", and it says " << dog.speak() << '\n';
+50
+51 	Animal *pAnimal = &cat;
+52 	std::cout << "pAnimal is named " << pAnimal->getName() << ", and it says " << pAnimal->speak() << '\n';
+53
+54 	pAnimal = &dog;
+55 	std::cout << "pAnimal is named " << pAnimal->getName() << ", and it says " << pAnimal->speak() << '\n';
+56
+57 	return 0;
+58 }
+
+
+
+/*
+Наш пример с Animal/Cat/Dog не работает так, как мы хотим,потому что ссылка/указатель класса Animal не может получить
+доступ к методам speak() дочерних классов. 
+
+Один из способов обойти эту проблему — сделать так, чтобы данные возвращаемые методом speak(), стали доступными в виде 
+родительской части класса Animal (так же, как name класса Animal доступен через член m_name ).
+
+Обновите классы Animal, Cat и Dog в коде, приведенном выше, добавив новый член m_speak в класс Animal. Инициализируйте
+его соответствующим образом. Следующая программа должна работать корректно:
+
+-----------------
+Мой ответ
+
+*/
+#include <iostream>
+#include <string>
+
+class Animal
+{
+protected:
+	std::string m_name;
+	std::string m_speak;
+
+ 	Animal(std::string name, std::string speak="???")
+ 		: m_name(name), m_speak(speak)
+ 	{
+ 	}
+
+ public:
+ 	std::string getName() { return m_name; }
+	std::string speak() { return m_speak; }
+ };
+
+ class Cat: public Animal
+ {
+ public:
+ 	Cat(std::string name)
+ 		: Animal(name,"Meow")
+ 	{
+ 	}
+ };
+
+ class Dog: public Animal
+ {
+ public:
+ 	Dog(std::string name)
+ 	: Animal(name,"Woof")
+ 	{
+ 	}
+ };
+
+
+
+
+int main()
+{
+	Cat matros("Matros"), ivan("Ivan"), martun("Martun");
+	Dog barsik("Barsik"), tolik("Tolik"), tyzik("Tyzik");
+
+	// Создаем массив указателей на наши объекты Cat и Dog
+	Animal *animals[] = { &matros, &ivan, &martun, &barsik, &tolik, &tyzik};
+	for (int iii=0; iii < 6; iii++)
+		std::cout << animals[iii]->getName() << " says " << animals[iii]->speak() << '\n';
+
+	return 0;
+}
+
+
+==============
+
+Ответ
+
+#include <iostream> 
+#include <string>
+ 
+class Animal
+{
+protected:
+    std::string m_name;
+    const char* m_speak;
+ 
+    // Мы делаем этот конструктор protected так как не хотим, чтобы пользователи могли создавать объекты класса Animal напрямую,
+    // но хотим, чтобы у дочерних классов доступ был открыт
+    Animal(std::string name, const char* speak)
+        : m_name(name), m_speak(speak)
+    {
+    }
+ 
+public:
+    std::string getName() { return m_name; }
+    const char* speak() { return m_speak; }
+};
+ 
+class Cat: public Animal
+{
+public:
+    Cat(std::string name)
+        : Animal(name, "Meow")
+    {
+    }
+};
+ 
+class Dog: public Animal
+{
+public:
+    Dog(std::string name)
+        : Animal(name, "Woof")
+    {
+    }
+};
+ 
+int main()
+{
+    Cat matros("Matros"), ivan("Ivan"), martun("Martun");
+    Dog barsik("Barsik"), tolik("Tolik"), tyzik("Tyzik");
+ 
+    // Создаем массив указателей на наши объекты Cat и Dog
+    Animal *animals[] = { &matros, &ivan, &martun, &barsik, &tolik, &tyzik};
+    for (int iii=0; iii < 6; iii++)
+        std::cout << animals[iii]->getName() << " says " << animals[iii]->speak() << '\n';
+ 
+    return 0;
+}

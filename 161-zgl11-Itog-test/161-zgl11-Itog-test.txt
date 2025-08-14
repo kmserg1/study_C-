@@ -1,0 +1,915 @@
+Глава No11.Итоговый тест
+
+В этойглаве мы рассмотрели наследование в языке C++. Пора закрепить пройденный материал.
+
+Оглавление:
+1. Теория
+2. ЗаданиеNo1
+3. ЗаданиеNo2
+4. ЗаданиеNo3
+
+
+Теория
+
+Наследование позволяет моделировать отношения типа «является» между двумя объектами. 
+Объект,который наследует, называется дочерним классом. 
+Объект, которого наследуют, называется родительским классом.
+
+При наследовании дочерний класс наследует всечлены родительского класса.
+При инициализации объектов дочернего класса, сначала выполняется построение родительской части объекта, а
+затем уже дочерней части объекта. Рассмотрим детально:
+
+ Сначала выделяется память для объекта дочернего класса (достаточная порция для двухчастей, из которых состоит
+  объект: родительская и дочерняя).
+ Вызывается соответствующий конструктор дочернего класса.
+ Выполняется построение родительской части с использованием соответствующего конструктора родительского
+  класса. Если конструктор не указан, то используется конструктор по умолчанию родительского класса.
+ Список инициализации дочернего класса инициализирует члены дочернего класса.
+ Выполняется тело конструктора дочернего класса.
+ Управление возвращается обратно в caller.
+
+Освобождение памяти (уничтожение) происходит в порядке, противоположном построению: от дочерних до
+родительских классов.
+
+Язык C++ имеет 3 спецификатора доступа: public, private и protected. Спецификатор protected используется 
+для разрешения доступа к членам дружественным классам/функциям и дочерним классам, всем остальным объектам — доступ
+закрыт.
+
+Есть 3 типа наследования: public,private и protected. Наиболее распространенный тип наследования — public.
+
+Таблица спецификаторов доступаитиповнаследования:
+Спецификатор
+ Спецификатордоступапри
+ Спецификатордоступа при
+ Спецификатордоступапри
+доступав
+ наследованиитипаpublicв
+ наследованиитипаprivate
+ наследованиитипа
+родительском классе
+ дочернемклассе
+ вдочернемклассе
+ protectedвдочернем
+классе
+public
+ public
+ private
+ protected
+private
+ Недоступен
+ Недоступен
+ Недоступен
+protected
+ protected
+ private
+ protected
+
+
+Дочерние классы могут изменять методы родительского класса, добавлять свой функционал, изменять
+спецификатор доступа наследуемых членов или даже скрывать методы родительского класса. Всё это выполняется
+в теле дочернего класса.
+
+Множественное наследование позволяет дочернему классу иметь сразу несколько родительских классов. Не
+рекомендуется использовать множественное наследование, если есть альтернативные решения.
+
+Тест
+Задание No 1
+Для каждой из следующих программ определите результат выполнения. Если программа не скомпилируется, то объясните
+почему. Запускать код не нужно, вы должны определить результат/ошибки программ без помощи компилятора.
+
+a)
+1 #include <iostream>
+2
+3 class Parent
+4 {
+5 public:
+6 	Parent()
+7 	{
+8 		std::cout<<"Parent()\n";
+9 	}
+10 	~Parent()
+11 	{
+12 		std::cout<<"~Parent()\n";
+13 	}
+14 };
+15
+16 classChild: public Parent
+17 {
+18 public:
+19 	Child()
+20 	{
+21 		std::cout<<"Child()\n";
+22 	}
+23	~Child()
+24 	{
+25 		std::cout<<"~Child()\n";
+26 	}
+27 };
+28
+29 int main()
+30 {
+31 	Child ch;
+32 }
+
+Мой ответ
+Parent()
+Child()
+~Child()
+~Parent()
+
+Ответ No 1.a)
+Parent()
+Child()
+~Child()
+~Parent()
+
+b)
+1 #include<iostream>
+2
+3 classParent
+4 {
+5 public:
+6 	Parent()
+7 	{
+8 		std::cout<<"Parent()\n";
+9 	}
+10 	~Parent()
+11	{
+12  		std::cout<<"~Parent()\n";
+13 	}
+14 };
+15
+16 class Child: public Parent
+17 {
+18 public:
+19 	Child()
+20 	{
+21 		std::cout << "Child()\n";
+22 	}
+23 	~Child()
+24 	{
+25 		std::cout << "~Child()\n";
+26 	}
+27 };
+28
+29 int main()
+30 {
+31 	Child ch;
+32 	Parent p;
+33 }
+
+Подсказка: Локальные переменные уничтожаются в порядке, противоположном определению.
+
+Мой ответ
+Parent()
+Child()
+Parent()
+~Parent()
+~Child()
+~Parent()
+
+Ответ No1.b)
+Сначала выполняется построение ch:
+
+Parent()
+Child()
+
+Затем построение p:
+
+Parent()
+
+Затем уничтожение p:
+
+~Parent()
+
+Затем уничтожение ch:
+
+~Child()
+~Parent()
+
+c)
+1 #include <iostream>
+2
+3 classParent
+4 {
+5 private:
+6 	 int m_x;
+7 public:
+8	 Parent(intx) : m_x(x)
+9 	{
+10	 	std::cout<<"Parent()\n";
+11 	}
+12 	~Parent()
+13 	{
+14 		std::cout<<"~Parent()\n";
+15 	}
+16
+17	void print() { std::cout << "Parent:" << m_x<<'\n'; }
+18 };
+19
+20 class Child: public Parent
+21 {
+22 public:
+23 	Child(int y): Parent(y)
+24 	{
+25 		std::cout<<"Child()\n";
+26 	 }
+27 	~Child()
+28 	{
+29 		std::cout<<"~Child()\n";
+30 	}
+31
+32 	void print() {std::cout << "Child: " << m_x << '\n';}
+33 };
+34
+35 int main()
+36 {
+37 	Child ch(7);
+38 	ch.print();
+39 }
+
+Мой ответ
+Не скомпилируется, т.к. print() на строчке 32 не имеет доступа к m_x
+
+Ответ No 1.c)
+
+d)
+1 #include <iostream>
+2
+3 class Parent
+4 {
+5 protected:
+6	int m_x;
+7 public:
+8  	Parent(int x) : m_x(x)
+9 	{
+10 		std::cout << "Parent()\n";
+11	}
+12	~Parent()
+13 	{
+14 		std::cout<<"~Parent()\n";
+15 	}
+16
+17 	void print() {std::cout << "Parent:" << m_x <<'\n'; }
+18 };
+19
+20 class Child: public Parent
+21 {
+22 public:
+23 	Child(int y) : Parent(y)
+24 	{ 
+25		std::cout << "Child()\n";
+26  	}
+27 	~Child()
+28 	{
+29 		std::cout<<"~Child()\n";
+30 	}
+31
+32 	void print() {std::cout << "Child: " << m_x << '\n';}
+33 };
+34
+35 int main()
+36 {
+37 	Child ch(7);
+38 	ch.print();
+39 }
+
+Мой ответ
+Скомпилируется, т.к. m_x имеет спецификатор доступа protected.
+Результат:
+Parent()
+Child()
+Child: 7
+~Child()
+~Parent()
+
+Ответ No1.d)
+
+Результат:
+Parent()
+Child()
+Child: 7
+~Child()
+~Parent()
+
+e)
+1 #include <iostream>
+2
+3 class Parent
+4 {
+5 protected:
+6 	int m_x;
+7 public:
+8 	Parent(intx):m_x(x)
+9 	{
+10 		std::cout << "Parent()\n";
+11 	}
+12 	~Parent()
+13 	{
+14 	std::cout<<"~Parent()\n";
+15 	}
+16
+17 	void print() {std::cout << "Parent:" << m_x << '\n'; }
+18 };
+19
+20 class Child: public Parent
+21 {
+22 public:
+23 	Child(int y) : Parent(y)
+24	{
+25 		std::cout<<"Child()\n";
+26 	}
+27 	~Child()
+28 	{
+29 		std::cout<<"~Child()\n";
+30 	}
+31
+32	void print() {std::cout<<"Child: "<< m_x <<'\n';}
+33 };
+34
+35 class D2: public Child
+36 {
+37 public:
+38 	D2(int z) : Child(z)
+39 	{
+40 		std::cout<<"D2()\n";
+41 	}
+42 	~D2()
+43 	{
+44 		std::cout<<"~D2()\n";
+45 	}
+46
+47 	// Обратите внимание, здесь нет метода print()
+48 };
+49
+50 int main()
+51 {
+52 	D2 d(7);
+53 	d.print();
+54 }
+
+Мой ответ:
+Parent()
+Child()
+D2()
+Child: 7
+~D2()
+~Child()
+~Parent()
+
+
+Ответ No1.e)
+
+
+Задание No 2
+
+a) Создайте классы Apple и Banana, которые наследуют класс Fruit. У класса Fruit есть две переменные-члены: 
+name и color.
+Следующий код:
+
+1 int main()
+2 {
+3 	Apple a("red");
+4 	Banana b;
+5
+6 	std::cout << "My" << a.getName() << " is " << a.getColor() << ".\n";
+7 	std::cout << "My" << b.getName() << " is " << b.getColor() << ".\n";
+8
+9 	return 0;
+10 }
+
+Должен выдавать следующий результат:
+My banana is yellow.
+My apple is red.
+
+Мой ответ
+#include <iostream>
+#include <string>
+
+class Fruit
+{
+protected:
+	std::string m_name;
+	std::string m_color;
+public:
+	Fruit(std::string n="", std::string c="") : m_name (n), m_color (c)
+	{
+	}
+	void print()
+	{
+		std::cout <<  "Name: " << m_name << ", Color: "<< m_color << '\n';
+	}
+};
+
+Ответ No 2.a)
+
+b) Добавьте новый класс GrannySmith, который наследует класс Apple.
+Следующий код:
+
+12 int main()
+ {
+
+3
+ Applea("red");
+5
+ GrannySmithc;
+4
+ Banana b;
+7
+ std::cout << "My"<<a.getName()<<" is " << a.getColor()<<".\n";
+6
+9
+10
+11
+ std::cout return 0;
+ << "My"<<c.getName()<<" is " << c.getColor()<<".\n";
+8
+ std::cout << "My"<<b.getName()<<" is " << b.getColor()<<".\n";
+12 }
+
+Должен выдавать следующий результат:
+My apple is red.
+My banana is yellow.
+My Granny Smith apple is green.
+
+Ответ No 2.b)
+
+
+Задание No 3
+
+Самое любимое! Будем создавать простую игру, в которой вы будете сражаться с монстрами.
+Цель игры — собрать максимум золота, прежде чем вы умрете или достигнете 20 уровня.
+
+Игра состоит из трехк лассов: Creature, Player и Monster. 
+Player и Monster наследуют класс Creature.
+
+a) Сначала создайте класс Creature со следующими членами:
+ имя (std::string);
+ символ (char);
+ количество здоровья (int);
+ количество урона, которое он наносит врагу во время атаки (int);
+ количество золота, которое они меет(int).
+
+Создайте полный набор геттеров (по одному на каждую переменную-член класса). Добавьте еще три метода:
+ void reduceHealth (int) — уменьшает здоровье Creature на указанное целочисленное значение;
+ bool isDead() — возвращает true, если здоровье Creature равно 0  или меньше;
+ void addGold(int) — добавляет золото Creature-у.
+
+Следующий код:
+
+1 #include <iostream>
+2 #include <string>
+3
+4 int main()
+5 {
+6 	Creature o("orc", 'o',4,2,10);
+7 	o.addGold(5);
+8
+9 	std::cout << "The "<<o.getName()<<"has "<<o.getHealth()<<" healthand is carrying "<< o.getGold() << "gold."
+10 	o.reduceHealth(1);
+11 	return 0;
+12 }
+
+Должен выдавать следующий результат:
+The orc has 3 health and is carrying 15 gold.
+
+Мой ответ
+
+#include <iostream>
+#include <string>
+
+class Creature
+{
+protected:
+	std::string m_name;
+	char m_symb;
+	int m_health;
+	int m_damageAbilities;
+	int m_gold;
+public:
+	Creature(std::string n="", char s=' ', int h=0, int dA=0, int gold=0) 
+		: m_name(n), m_symb(s), m_health(h), m_damageAbilities(dA), m_gold(gold)
+	{
+	}
+	std::string getName(){ return m_name; }
+	char getSymb(){ return m_symb; }
+	int getHealth() { return m_health; }
+	int getDamageAbilities() { return m_damageAbilities; }
+	int getGold() { return m_gold; }
+
+	void reduceHealth(int loss) // уменьшает здоровье Creature на указанное целочисленное значение
+	{
+		m_health-=loss; 
+	}
+
+
+	bool isDead() // возвращает true, если здоровье Creature равно 0 или меньше;
+	{
+		return (m_health <= 0) ;
+	}
+
+	void addGold(int profit) // добавляет золото Creature-у.
+	{
+		m_gold+=profit;
+	}
+
+};
+
+class Player: public Creature
+{
+};
+
+class Monster: public Creature
+{
+};
+
+#include <iostream>
+#include <string>
+ 
+int main()
+{
+	Creature o("orc", 'o', 4, 2, 10);
+	o.addGold(5);
+	o.reduceHealth(1);
+	std::cout << "The " << o.getName() << " has " << o.getHealth() << " health and is carrying " << o.getGold() << " gold.";
+ 
+	return 0;
+}
+
+
+Ответ No3. a)
+
+#include <iostream>
+#include <string>
+ 
+class Creature
+{
+protected:
+	std::string m_name;
+	char m_symbol;
+	int m_health;
+	int m_damage;
+	int m_gold;
+ 
+public:
+	Creature(std::string name, char symbol, int health, int damage, int gold) :
+		m_name(name), m_symbol(symbol), m_health(health), m_damage(damage), m_gold(gold)
+	{
+	}
+ 
+	const std::string& getName() { return m_name; }
+	char getSymbol() { return m_symbol; }
+	int getHealth() { return m_health; }
+	int getDamage() { return m_damage; }
+	int getGold() { return m_gold; }
+ 
+	void reduceHealth(int health) { m_health -= health; }
+	bool isDead() { return m_health <= 0; }
+	void addGold(int gold) { m_gold += gold; }
+};
+ 
+int main()
+{
+	Creature o("orc", 'o', 4, 2, 10);
+	o.addGold(5);
+	o.reduceHealth(1);
+	std::cout << "The " << o.getName() << " has " << o.getHealth() << " health and is carrying " << o.getGold() << " gold.";
+ 
+	return 0;
+}
+
+b) Теперь нам нужно создать класс Player, который наследует Creature. Player имеет:
+
+ переменную-член level, которая начинается с 1 ;
+ имя (пользователь вводит с клавиатуры);
+ символ @;
+ 10 очков здоровья;
+ 1 очко урона (для начала);
+ 0 золота.
+
+- Напишите метод levelUp(), который увеличивает уровень Player-а и его урон на 1.
+- Также напишите геттер для члена level и метод hasWon(), который возвращает true, если Player достиг 20 уровня.
+
+- Допишите в функцию main() код, который спрашивает у пользователя его имя и выводит количество его здоровья и золота:
+
+Enter your name: Anton
+Welcome, Anton.
+You have 10 health and are carrying 0 gold.
+
+Мой ответ:
+
+#include <iostream>
+#include <string>
+
+class Creature
+{
+protected:
+	std::string m_name;
+	char m_symb;
+	int m_health;
+	int m_damageAbilities;
+	int m_gold;
+public:
+	Creature(std::string n="", char s=' ', int h=0, int dA=0, int gold=0) 
+		: m_name(n), m_symb(s), m_health(h), m_damageAbilities(dA), m_gold(gold)
+	{
+	}
+	std::string getName(){ return m_name; }
+	char getSymb(){ return m_symb; }
+	int getHealth() { return m_health; }
+	int getDamageAbilities() { return m_damageAbilities; }
+	int getGold() { return m_gold; }
+
+	void reduceHealth(int loss) // уменьшает здоровье Creature на указанное целочисленное значение
+	{
+		m_health-=loss; 
+	}
+
+
+	bool isDead() // возвращает true, если здоровье Creature равно 0 или меньше;
+	{
+		return (m_health <= 0) ;
+	}
+
+	void addGold(int profit) // добавляет золото Creature-у.
+	{
+		m_gold+=profit;
+	}
+
+};
+
+class Player: public Creature
+{
+private:
+	int m_level;
+public:
+	Player(std::string name="", char c='@', int health=10, int damageAbilities=1, int gold=0, int level=1)
+		: Creature(name,'@',health,damageAbilities, gold), m_level(level)
+
+	{
+		if(m_name.length()==0) // якщо не пердали ім'я при створенні, то вводимо вручну
+		{
+			std::cout << "Enter your name: ";
+			std::cin >> m_name;
+		}
+	}
+	
+	bool getLevel() { return m_level; }
+	bool hasWon() { return m_level >=20; }
+	void levelUp()
+	{
+		++m_level;
+		++m_damageAbilities;
+	}
+
+};
+
+class Monster: public Creature
+{
+};
+
+
+int main()
+{
+	std::cout << "Enter your name: ";
+	std::string playerName;
+	std::cin >> playerName;
+ 
+	Player p(playerName);
+	std::cout << "Welcome, " << p.getName() << ".\n";
+ 
+	std::cout << "You have " << p.getHealth() << " health and are carrying " << p.getGold() << " gold.";
+ 
+	return 0;
+}
+
+
+Ответ No 3.b)
+
+#include <iostream>
+#include <string>
+ 
+class Creature
+{
+protected:
+	std::string m_name;
+	char m_symbol;
+	int m_health;
+	int m_damage;
+	int m_gold;
+ 
+public:
+	Creature(std::string name, char symbol, int health, int damage, int gold) :
+		m_name(name), m_symbol(symbol), m_health(health), m_damage(damage), m_gold(gold)
+	{
+	}
+ 
+	const std::string& getName() { return m_name; }
+	char getSymbol() { return m_symbol; }
+	int getHealth() { return m_health; }
+	int getDamage() { return m_damage; }
+	int getGold() { return m_gold; }
+ 
+	void reduceHealth(int health) { m_health -= health; }
+	bool isDead() { return m_health <= 0; }
+	void addGold(int gold) { m_gold += gold; }
+};
+ 
+class Player : public Creature
+{
+	int m_level = 1;
+ 
+public:
+	Player(std::string name)
+		: Creature(name, '@', 10, 1, 0)
+	{
+	}
+ 
+	void levelUp()
+	{
+		++m_level;
+		++m_damage;
+	}
+ 
+	int getLevel() { return m_level; }
+	bool hasWon() { return m_level >= 20; }
+};
+ 
+int main()
+{
+	std::cout << "Enter your name: ";
+	std::string playerName;
+	std::cin >> playerName;
+ 
+	Player p(playerName);
+	std::cout << "Welcome, " << p.getName() << ".\n";
+ 
+	std::cout << "You have " << p.getHealth() << " health and are carrying " << p.getGold() << " gold.";
+ 
+	return 0;
+}
+
+
+
+
+c) Следующий класс (Monster) также наследует Creature и у него нет собственных переменных-членов. Но есть перечисление
+Type, которое содержит 3 перечислителя, они обозначают типы монстров: DRAGON, ORC и SLIME (вам также нужен дополнительный 
+перечислитель MAX_TYPES).
+
+ОтветNo3.c)
+
+d) Каждый тип Монстра имеетсвое имя, символ, определенное количество здоровья, урона и золота:
+---------------------------------------------------------
+Type 		Name 	Symbol 	Health	 Damage	 Gold
+---------------------------------------------------------
+DRAGON		dragon 	D	 20	 4	 100
+ORC 		orc 	o	 4	 2	 25
+SLIME		slime	s	 1	 1	 10
+---------------------------------------------------------
+
+Следующий шаг — реализация конструктора класса Monster, с помощью которого можно создавать монстров. Этот
+конструктор должен принимать перечисление Type в качестве параметра, а затем создавать монстра с соответствующими
+таблице характеристиками.
+Этоможно реализовать по-разному. Однако, поскольку все наши свойства типов монстров предопределены (неслучайны),
+то мы будем использовать таблицу поиска. Таблица поиска — это массив, который содержит все предопределенные
+атрибуты (свойства) чего-либо. Мы можем использовать таблицу поиска для просмотра характеристик и определенного
+типа монстра по мере необходимости.
+Как этосделать? 
+Нам нужны всего лишь две вещи. Во-первых, массив с отдельным элементом для каждого типа монстра.
+Во-вторых, этот элемент будет содержать структуру, в которой будут находиться все предопределенные значения атрибутов
+для конкретного типа монстра.
+
+ Шаг No 1: Создайте структуру MonsterData внутри класса Monster. Эта структура должнаиметь следующие
+  перечислители: name, symbol, health, damage и gold .
+ Шаг No 2: Объявите статический массив этой структуры с именем monsterData.
+ Шаг No 3: Добавьте код определения нашей таблицы поиска вне тела класса:
+
+1 Monster::MonsterData Monster::monsterData[Monster::MAX_TYPES]
+2 {
+3 	{ "dragon",'D', 20,4,100 },
+4 	{ "orc",'o', 4, 2,25},
+5 	{ "slime", 's',1, 1, 10 }
+6 };
+
+
+Теперь мы можем искать любые значения, которые намнужны!
+Например,чтобы узнать количество золота Dragon, мы можем использовать 
+monsterData[DRAGON].gold.
+
+Используйте эту таблицу поиска для реализации вашего конструктора:
+1 Monster(Typetype):Creature(monsterData[type].name,...)
+
+Следующийкод:
+1 #include <iostream>
+2 #include <string>
+3
+4 int main()
+5 {
+6 	Monster m(Monster::ORC);
+7	std::cout << "A" << m.getName() << "(" << m.getSymbol() << ") was created.\n";
+8 }
+
+Должен выдавать следующий результат:
+A orc (o) was created.
+
+Ответ No 3.d)
+
+
+e) Наконец, добавьте статический метод getRandomMonster() в класс Monster.
+Этот метод должен генерировать случайное число от 0 до MAX_TYPES-1 и возвращать (возврат по значению)
+определенный тип монстра (вам нужно использовать оператор static_cast для конвертации int в Type, 
+чтобы передать его конструктору класса Monster).
+Вы можете использовать следующий код длягенерации случайного числа:
+
+1 #include <cstdlib>// для rand() и srand()
+2 #include <ctime> // для time()
+3
+4 // Генерируем  рандомное число между min иmax
+5 int getRandomNumber(int min,int max)
+6 {
+8 	//Равномерно распределяем генерацию значения из диапазона
+7 	static const double fraction=1.0/(static_cast<double>(RAND_MAX) + 1.0);
+9 	return static_cast<int>(rand()* fraction * (max-min+1)+ min);
+10 }
+
+Следующий код:
+
+1 #include <iostream>
+2 #include <string>
+3 #include <cstdlib>// для rand() и srand()
+4 #include <ctime> // для time()
+5
+6 int main()
+7 {
+8 	srand(static_cast<unsigned int>(time(0))); // устанавливаем значение системных часов в качестве стартового числа
+9 	rand(); // сбрасываем первый результат
+10
+11 	for (inti= 0; i <10; ++i)
+12 	{
+13 		Monsterm= Monster::getRandomMonster();
+14		std::cout<<"A"<<m.getName()<<" ("<<m.getSymbol() << ") was created.\n";
+15 	}
+16
+17 	return 0;
+18 }
+
+Должен сгенерировать 10 рандомных монстров:
+A slime (s) was created.
+A orc(o) was created.
+A slime (s) was created.
+A slime (s) was created.
+A orc (o) was created.
+A orc (o) was created.
+A dragon (D) was created.
+A slime (s) was created.
+A orc (o) was created.
+A orc (o) was created.
+
+ОтветNo3.e)
+
+f) Готово, теперь намнужно разобраться с логикой выполнениянашей игры!
+
+Суть:
+ Игрок сталкивается с одним случайно выбранным монстром.
+ С каждым монстром игрок может либо (R)un, либо(F)ight.
+ Если игрок решает Run, то шансы на удачный побег составляют 50%.
+ Если игроку удается сбежать, то он благополучно переходит к следующему монстру (его здоровье / урон / золото при этом не уменьшаются).
+ Если игроку не удается сбежать, то монстр его атакует. Здоровье игрока уменьшается от урона монстра. Затем игрок выбирает свое следующее действие.
+ Если игрок выбирает Fight, то он атакует монстра. Здоровье монстра уменьшается от урона игрока.
+ Если монстр умирает, то игрок забирает всё золото монстра + увеличивает свой level  и урон на 1.
+ Если монстр не умирает, то он атакует игрока. Здоровье игрока уменьшается от урона монстра.
+ Игра заканчивается, если игрок умер (проигрыш) или достиг 20 уровня (выигрыш).
+ Если игрок умирает, то программа должна сообщить игроку, какой уровень у него был и сколько золота он имел.
+ Если игрок побеждает, то игра должна сообщить игроку,что он выиграл и сколько у него есть золота.
+
+Примеригры:
+Enter your name: Anton
+Welcome, Anton
+You have encountered a orc (o).
+(R)un or (F)ight: r
+You successfully fled.
+You have encountered a slime (s).
+(R)unor(F)ight:f
+Youhit theslimefor 1damage.
+Youkilledthe slime.
+Youare nowlevel2.
+Youfound 10 gold.
+(R)unor(F)ight:f
+Youhaveencounteredadragon(D).
+Thedragonhit youfor4 damage.
+Youhit thedragonfor2 damage.
+Youhit thedragonfor2 damage.
+(R)unor(F)ight:f
+Thedragonhit youfor4 damage.
+(R)unor(F)ight:f
+Thedragonhit youfor4 damage.
+Youhit thedragonfor2 damage.
+Youdiedatlevel2 andwith 10 gold.
+Toobad youcan'ttakeitwithyou!
+Подсказка: Увас должны быть следующие 4функции:
+ ФункциясозданияИгрокаиосновнойигровойцикл(вфункцииmain()).
+ ФункцияfightMonster(),котораяобрабатываетбоймеждуИгрокомиМонстром,и спрашиваету игрока,чтоон
+хочет  сделать:RunилиFight.
+ обрабатываетатакумонстраигроком,включаяувеличениеуровняигрока.
+ФункцияattackMonster(),которая ФункцияattackPlayer(),котораяобрабатываетатакуигрока монстром.
+ОтветNo3.f)

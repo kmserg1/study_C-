@@ -1,0 +1,302 @@
+e) Наконец, добавьте статический метод getRandomMonster() в класс Monster. 
+Этот метод должен генерировать случайное число от 0 до MAX_TYPES-1 и возвращать (возврат по значению) 
+определенный тип монстра (вам нужно использовать оператор static_cast для конвертации int в Type, 
+чтобы передать его конструктору класса Monster).
+
+Вы можете использовать следующий код для генерации случайного числа:
+
+#include <cstdlib> // для rand() и srand()
+#include <ctime> // для time()
+ 
+// Генерируем рандомное число между min и max
+int getRandomNumber(int min, int max)
+{
+	static const double fraction = 1.0 / (static_cast<double>(RAND_MAX) + 1.0);
+	// Равномерно распределяем генерацию значения из диапазона
+	return static_cast<int>(rand() * fraction * (max - min + 1) + min);
+}
+
+Следующий код:
+
+#include <iostream>
+#include <string>
+#include <cstdlib> // для rand() и srand()
+#include <ctime> // для time()
+ 
+int main()
+{
+	srand(static_cast<unsigned int>(time(0))); // устанавливаем значение системных часов в качестве стартового числа
+	rand(); // сбрасываем первый результат
+ 
+	for (int i = 0; i < 10; ++i)
+	{
+		Monster m = Monster::getRandomMonster();
+		std::cout << "A " << m.getName() << " (" << m.getSymbol() << ") was created.\n";
+	}
+ 
+	return 0;
+}
+Должен сгенерировать 10 рандомных монстров:
+
+A slime (s) was created.
+A orc (o) was created.
+A slime (s) was created.
+A slime (s) was created.
+A orc (o) was created.
+A orc (o) was created.
+A dragon (D) was created.
+A slime (s) was created.
+A orc (o) was created.
+A orc (o) was created.
+
+------------
+Мой ответ
+
+#include <iostream>
+#include <string>
+#include <cassert>
+#include <cstdlib> // для rand() и srand()
+#include <ctime> // для time()
+
+int getRandomNumber(int min, int max)
+{	srand(static_cast<unsigned int>(time(0))+rand());
+	static const double fraction = 1.0 / (static_cast<double>(RAND_MAX) + 1.0);
+	// Равномерно распределяем генерацию значения из диапазона
+	return static_cast<int>(rand() * fraction * (max - min + 1) + min);
+}
+
+class Creature
+{
+protected:
+	std::string m_name;
+	char m_symb;
+	int m_health;
+	int m_damageAbilities;
+	int m_gold;
+public:
+	Creature(std::string n="", char s=' ', int h=0, int dA=0, int gold=0) 
+		: m_name(n), m_symb(s), m_health(h), m_damageAbilities(dA), m_gold(gold)
+	{
+	}
+	std::string getName(){ return m_name; }
+	char getSymbol(){ return m_symb; }
+	int getHealth() { return m_health; }
+	int getDamageAbilities() { return m_damageAbilities; }
+	int getGold() { return m_gold; }
+
+	void reduceHealth(int loss) // уменьшает здоровье Creature на указанное целочисленное значение
+	{
+		m_health-=loss; 
+	}
+
+
+	bool isDead() // возвращает true, если здоровье Creature равно 0 или меньше;
+	{
+		return (m_health <= 0) ;
+	}
+
+	void addGold(int profit) // добавляет золото Creature-у.
+	{
+		m_gold+=profit;
+	}
+
+};
+
+class Player: public Creature
+{
+private:
+	int m_level;
+public:
+	Player(std::string name="", char c='@', int health=10, int damageAbilities=1, int gold=0, int level=1)
+		: Creature(name,'@',health,damageAbilities, gold), m_level(level)
+
+	{
+		if(m_name.length()==0) // якщо не пердали ім'я при створенні, то вводимо вручну
+		{
+			std::cout << "Enter your name: ";
+			std::cin >> m_name;
+		}
+	}
+	
+	bool getLevel() { return m_level; }
+	bool hasWon() { return m_level >=20; }
+	void levelUp()
+	{
+		++m_level;
+		++m_damageAbilities;
+	}
+
+};
+
+
+class Monster : public Creature
+{
+public:
+	enum Type
+	{
+		DRAGON,
+		ORC,
+		SLIME,
+		MAX_TYPES
+	};
+	struct MonsterData
+	{
+		std::string name;
+		char symbol; 
+		int health, damage, gold;
+	};
+	
+	static MonsterData monsterData[Monster::MAX_TYPES];
+	
+	Monster(Type type): Creature(monsterData[type].name, monsterData[type].symbol, monsterData[type].health, monsterData[type].damage, monsterData[type].gold)
+	{
+	}
+
+	static Monster::Type getRandomMonster()
+	{
+		int i;
+		i=getRandomNumber(0, Monster::MAX_TYPES-1);
+		return static_cast<Type>(i);
+	}
+	
+
+};
+
+Monster::MonsterData Monster::monsterData[Monster::MAX_TYPES]
+{
+	{"dragon",'D',20,4,100},
+	{"orc",'o',4,2,25},
+	{"slime",'s',1,1,10}
+};
+
+ 
+int main()
+{
+	srand(static_cast<unsigned int>(time(0))); // устанавливаем значение системных часов в качестве стартового числа
+	rand(); // сбрасываем первый результат
+ 
+	for (int i = 0; i < 10; ++i)
+	{
+		Monster m = Monster::getRandomMonster();
+		std::cout << "A " << m.getName() << " (" << m.getSymbol() << ") was created.\n";
+	}
+ 
+	return 0;
+}
+
+
+
+Ответ №3.e)
+
+#include <iostream>
+#include <string>
+#include <cstdlib> // для rand() и srand()
+#include <ctime> // для time()
+ 
+// Генерируем рандомное число между min и max
+int getRandomNumber(int min, int max)
+{
+	static const double fraction = 1.0 / (static_cast<double>(RAND_MAX) + 1.0);
+	return static_cast<int>(rand() * fraction * (max - min + 1) + min);
+}
+ 
+class Creature
+{
+protected:
+	std::string m_name;
+	char m_symbol;
+	int m_health;
+	int m_damage;
+	int m_gold;
+ 
+public:
+	Creature(std::string name, char symbol, int health, int damage, int gold) :
+		m_name(name), m_symbol(symbol), m_health(health), m_damage(damage), m_gold(gold)
+	{
+	}
+ 
+	char getSymbol() { return m_symbol; }
+	const std::string& getName() { return m_name; }
+	bool isDead() { return m_health <= 0; }
+	int getGold() { return m_gold; }
+	void addGold(int gold) { m_gold += gold;  }
+	void reduceHealth(int health) { m_health -= health;  }
+	int getHealth() { return m_health; }
+	int getDamage() { return m_damage;  }
+};
+ 
+class Player : public Creature
+{
+	int m_level = 1;
+ 
+public:
+	Player(std::string name)
+		: Creature(name, '@', 10, 1, 0)
+	{
+	}
+ 
+	void levelUp()
+	{
+		++m_level;
+		++m_damage;
+	}
+ 
+	int getLevel() { return m_level; }
+	bool hasWon() { return m_level >= 20; }
+};
+ 
+class Monster : public Creature
+{
+public:
+	enum Type
+	{
+		DRAGON,
+		ORC,
+		SLIME,
+		MAX_TYPES
+	};
+ 
+	struct MonsterData
+	{
+		const char* name;
+		char symbol;
+		int health;
+		int damage;
+		int gold;
+	};
+ 
+	static MonsterData monsterData[MAX_TYPES];
+ 
+	Monster(Type type)
+		: Creature(monsterData[type].name, monsterData[type].symbol, monsterData[type].health, monsterData[type].damage, monsterData[type].gold)
+	{
+	}
+ 
+	static Monster getRandomMonster()
+	{
+		int num = getRandomNumber(0, MAX_TYPES - 1);
+		return Monster(static_cast<Type>(num));
+	}
+};
+ 
+Monster::MonsterData Monster::monsterData[Monster::MAX_TYPES]
+{
+	{ "dragon", 'D', 20, 4, 100 },
+	{ "orc", 'o', 4, 2, 25 },
+	{ "slime", 's', 1, 1, 10 }
+};
+ 
+int main()
+{
+	srand(static_cast<unsigned int>(time(0))); // устанавливаем значение системных часов в качестве стартового числа
+	rand(); // сбрасываем первый результат
+ 
+	for (int i = 0; i < 10; ++i)
+	{
+		Monster m = Monster::getRandomMonster();
+		std::cout << "A " << m.getName() << " (" << m.getSymbol() << ") was created.\n";
+	}
+ 
+	return 0;
+}
+

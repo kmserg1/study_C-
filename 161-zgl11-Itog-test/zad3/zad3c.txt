@@ -1,0 +1,30 @@
+c) Следующий класс (Monster) также наследует Creature и у него нет собственных переменных-членов. Но есть перечисление
+Type, которое содержит 3 перечислителя, они обозначают типы монстров: DRAGON, ORC и SLIME (вам также нужен дополнительный 
+перечислитель MAX_TYPES).
+
+class Monster : public Creature
+{
+public:
+	enum Type
+	{
+		DRAGON,
+		ORC,
+		SLIME,
+		MAX_TYPES
+	};
+};
+
+Ответ No 3.c)
+
+class Monster : public Creature
+{
+public:
+	enum Type
+	{
+		DRAGON,
+		ORC,
+		SLIME,
+		MAX_TYPES
+	};
+};
+
