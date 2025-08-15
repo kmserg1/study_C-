@@ -1,0 +1,634 @@
+Урок No163. Виртуальные функциии Полиморфизм
+
+
+На предыдущем уроке мы рассматривали ряд примеров, в которых использование указателей или ссылок родительского
+класса упрощало логику и уменьшало количество кода.
+
+Оглавление:
+1. Виртуальные функции и Полиморфизм
+2. Более сложный пример
+3. Использование ключевого слова virtual
+4. Типы возврата виртуальных функций
+5. Не вызывайте виртуальные функции в теле конструкторов ил идеструкторов
+6. Недостаток виртуальных функций
+7. Тест
+
+
+Виртуальные функции и Полиморфизм
+
+Тем не менее, мы сталкивались с проблемой, когда родительский указатель или ссылка вызывали только родительские
+методы, а не дочерние. Например:
+
+1 #include <iostream>
+2
+3 class Parent
+4 {
+5 public:
+6 	const char* getName() { return "Parent"; }
+7 };
+8
+9 class Child: public Parent
+10 {
+11 public:
+12 	const char* getName() { return "Child"; }
+13 };
+14
+15 int main()
+16 {
+17 	Child child;
+18 	Parent &rParent = child;
+19 	std::cout << "rParent is a " << rParent.getName() << '\n';
+20 }
+
+Результат:
+rParent is a Parent
+
+Поскольку rParent являетсяс сылкой класса Parent, то вызывается Parent::getName(), хотя фактически мы ссылаемся на часть
+Parent объекта child .
+
+На этом уроке мы рассмотрим, как можно решить эту проблему с помощью виртуальных функций.
+Виртуальная функция в языке С++ — это особый тип функции, которая, при её вызове, выполняет «наиболее» дочерний
+метод, который существует между родительским и дочерними классами. Это свойство еще известно, как полиморфизм.
+Дочерний метод вызывается тогда, когда совпадает сигнатура (имя, типы параметров и является ли метод константным) и тип
+возврата дочернего метода с сигнатурой и типом возврата метода родительского класса. Такие методы называются
+переопределениями (или «переопределенными методами»).
+
+Чтобы сделать функцию виртуальной, нужно просто указать ключевое слово virtual перед объявлением функции. Например:
+
+1 #include <iostream>
+2
+3 class Parent
+4 {
+5 public:
+6 	virtual const char* getName() { return "Parent"; }// добавилиключевое слово virtual
+7 };
+8
+9 class Child: public Parent
+10 {
+11 public:
+12 	virtual const char* getName() { return "Child"; }
+13 };
+14
+15 int main()
+16 {
+17 Child child;
+18 	Parent &rParent = child;
+19 	std::cout << "rParent is a " << rParent.getName() << '\n';
+20
+21 	return 0;
+22 }
+
+Результат:
+rParent is a Child
+
+Поскольку rParent является ссылкой на родительскую часть объекта child, то, обычно, при обработке rParent.getName()
+вызывался бы Parent::getName(). Темне менее, поскольку Parent::getName() является виртуальной функцией, то компилятор
+понимает, что нужно посмотреть, есть ли переопределения этого метода в дочерних классах. И компилятор находит Child::getName()!
+
+Рассмотрим пример посложнее:
+
+1 #include <iostream>
+2
+3 class A
+4 {
+5 public:
+6 	virtual const char* getName() { return "A";}
+7 };
+8
+9 class B: public A
+10 {
+11 public:
+12 	virtual const char* getName() { return "B";}
+13 };
+14
+15 class C: public B
+16 {
+17 public:
+18 	virtual const char* getName() { return "C";}
+19 };
+20
+21 class D: publicC
+22 {
+23 public:
+24 	virtual const char* getName() { return "D";}
+25 };
+26
+27 int main()
+28 {
+29 	C c;
+30 	A &rParent = c;
+31 	std::cout << "rParent is a " << rParent.getName() << '\n';
+32
+33 	return 0;
+34 }
+
+Как вы думаете, какой результат выполнения этой программы?
+Рассмотрим всё по порядку:
+ Сначала создается объект c класса C.
+ rParent — это ссылка класса A, которой мы указываем ссылаться на часть A объекта c.
+ Затем вызывается метод rParent.getName().
+ Вызов rParent.GetName() приводит к вызовуA::getName(). Однако, посколькуA::getName() является виртуальной
+функцией, то компилятор ищет «наиболее» дочерний метод между A и C. В этом случае — это C::getName().
+Обратите внимание, компилятор не будет вызывать D::getName(), поскольку наш исходный объект был класса C, а не класса D,
+поэтому рассматриваются методы только между классами A и C.
+
+Результатвыполненияпрограммы:
+rParent is a C
+
+Более сложный пример
+Рассмотрим класс Animal из предыдущего урока, добавив тестовый код:
+
+1 #include <iostream>
+2 #include <string>
+3
+4 class Animal
+5 {
+6 protected:
+7 	std::stringm_name;
+8
+9 	// Мыделаем этот конструктор protected таккак не хотим, чтобы пользователи
+10 	// нохотим, чтобыв дочерних классахдоступ был открыт
+11 	Animal(std::stringname)
+12 		:m_name(name)
+13 	{
+14 	}
+15
+16 public:
+17 	std::stringgetName() { returnm_name; }
+18 	constchar*speak() { return "???"; }
+19 };
+20
+21 class Cat: public Animal
+22 {
+23 public:
+24 	Cat(std::string name)
+25 		:Animal(name)
+26 	{
+27 	}
+28
+29 	constchar*speak() { return "Meow"; }
+30 };
+31
+32 class Dog: public Animal
+33 {
+34 public:
+35 	Dog(std::string name)
+36 		:Animal(name)
+37 	{
+38 	}
+39
+40 	constchar*speak() { return "Woof"; }
+41 };
+42
+43 void report(Animal &animal)
+44 {
+45 	std::cout << animal.getName() << " says " << animal.speak() <<'\n';
+46 }
+47
+48 int main()
+49 {
+50 	Cat cat("Matros");
+51 	Dog dog("Barsik");
+52
+53 	report(cat);
+54 	report(dog);
+55 }
+
+Результат выполнения программы:
+Matros says ???
+Barsik says ???
+
+А теперь рассмотрим тот же класс, но сделав метод speak() виртуальным:
+
+1 #include <iostream>
+2 #include <string>
+3
+4 class Animal
+5 {
+6 protected:
+7 	std::string m_name;
+8
+9 	// Мыделаем этот конструктор protected таккак не хотим, чтобы пользователи
+10 	// нохотим, чтобыв дочерних классахдоступ был открыт
+11 	Animal(std::string name)
+12 		:m_name(name)
+13 	{
+14 	}
+15
+16 public:
+17 	std::string getName() { return m_name; }
+18 	virtual const char* speak() { return "???";}
+19 };
+20
+21 class Cat: public Animal
+22 {
+23 public:
+24 	Cat(std::string name)
+25 		:Animal(name)
+26 	{
+27 	}
+28
+29 	virtual const char* speak() { return "Meow"; }
+30 };
+31
+32 class Dog: public Animal
+33 {
+34 public:
+35 	Dog(std::string name)
+36 		:Animal(name)
+37 	{
+38 	}
+39
+40 	virtual const char* speak() { return "Woof"; }
+41 };
+42
+43 void report(Animal &animal)
+44 {
+45 	std::cout << animal.getName() << " says " << animal.speak() <<'\n';
+46 }
+47
+48 int main()
+49 {
+50 	Cat cat("Matros");
+51 	Dog dog("Barsik");
+52
+53 	report(cat);
+54 	report(dog);
+55 }
+
+Результат выполнения программы:
+Matros says Meow
+Barsik says Woof
+
+Сработало!
+При обработке animal.speak(), компилятор видит, что метод Animal::speak() является виртуальной функцией. Когда animal
+ссылается на часть Animal объекта cat, то компилятор просматривает все классы между Animal и Cat, чтобы найти наиболее
+дочерний метод speak(). И находит Cat::speak(). В случае, когда animal ссылается на часть Animal объекта dog, компилятор
+находит Dog::speak().
+
+Обратите внимание, мы не сделали Animal::GetName() виртуальной функцией. Это из-за того, что GetName() никогда не
+переопределяется ни в одном из дочерних классов, поэтому в этом нет необходимости.
+
+Аналогично со следующим примером с массивом животных:
+
+1 Cat matros("Matros"), ivan("Ivan"), martun("Martun");
+2 Dog barsik("Barsik"), tolik("Tolik"), tyzik("Tyzik");
+3
+4 // Создаем массив указателей на наши объекты Catи Dog
+5 Animal *animals[] = { &matros, &barsik, &ivan, &tolik, &martun, &tyzik};
+6 for(int iii=0; iii < 6; ++iii)
+7 	std::cout <<animals[iii]->getName() << " says " <<animals[iii]->speak() <<'\n';
+
+Результат:
+Matros says Meow
+Barsik says Woof
+Ivan says Meow
+Tolik says Woof
+Martun says Meow
+Tyzik says Woof
+
+Несмотря на то, что эти два примера используют только классы Cat и Dog, любые другие дочерние классы также будут работать
+с нашей функцией report() и с массивом животных, без внесения дополнительных модификаций! Это, пожалуй, самое большое
+преимущество виртуальных функций — возможность структурировать код таким образом, чтобы новые дочерние классы
+автоматически работали со старым кодом, без необходимости внесения изменений со стороны программиста!
+
+Предупреждение: Сигнатура виртуального метода дочернего класса должна полностью соответствовать сигнатуре
+виртуального метода родительского класса. Если у дочернего метода будет другой тип параметров, нежели у
+родительского, то вызываться этот метод не будет.
+
+
+Использование ключевого слова virtual
+
+Если функция отмечена как виртуальная,то все соответствующие переопределения тоже считаются виртуальными, даже если
+возле них явно не указано ключевое слова virtual. Однако, наличие ключевого слова virtual возле методов дочерних классов
+послужит полезным напоминанием о том,что эти методы являются виртуальными, а не обычными. Следовательно, полезно
+указывать ключевоеслово virtual возле переопределений в дочерних классах, даже если это не является строго необходимым.
+
+
+Типы возврата виртуальных функций
+
+Типы возврата виртуальной функции и её переопределений должны совпадать. Рассмотрим следующий пример:
+
+1 class Parent
+2 {
+3 public:
+4 	virtual int getValue() {return 7; }
+5 };
+6
+7 class Child: public Parent
+8 {
+9 public:
+10 	virtual double getValue() { return 9.68; }
+11 };
+
+Вэтом случае Child::getValue() не считается подходящим переопределением для Parent::getValue(), так как типы возвратов
+разные (метод Child::getValue() считается полностью отдельной функцией).
+
+
+Не вызывайте виртуальные функции в теле конструкторов или деструкторов
+
+Вот еще одна ловушка для новичков. Вы недолжны вызывать виртуальные функции в теле конструкторов или деструкторов.
+Почему?
+Помните, что при создании объекта класса Child сначала создается родительская часть этого объекта, а затем уже дочерняя?
+Если вы будете вызывать виртуальную функцию из конструктора класса Parent притом, что дочерняя часть создаваемого
+объекта еще не была создана, то вызвать дочерний метод вместо родительского будет невозможно, таккак объект child для
+работы с методом класса Child еще не будет создан. В такихслучаях, в языке C++ будет вызываться родительская версия
+метода.
+
+Аналогичная проблема существует и с деструкторами. Если вы вызываете виртуальную функцию в теле деструктора класса
+Parent, то всегдабудет вызываться методкласса Parent, так как дочерняя часть объекта уже будет уничтожена.
+Правило:Никогда невызывайтевиртуальные функциивтеле конструкторов или деструкторов.
+
+
+Недостаток виртуальных функций
+
+«Если всё так хорошо с виртуальными функциями, то почему бы не сделать все методы виртуальными?» — спросите Вы.
+Ответ:
+«Это неэффективно!». Обработка и выполнение вызова виртуального методазанимает больше времени, чем обработка и
+выполнение вызова обычного метода. Кроме того, компилятор также должен выделять один дополнительный указатель для
+каждого объекта класса, который имеет одну или несколько виртуальных функций.
+
+Тест
+
+Какой результат выполнения следующих программ? Не нужно запускать/выполнять следующий код, вы должны определить
+результат, без помощи своих IDE.
+a)
+1 #include <iostream>
+2
+3 class A
+4 {
+5 public:
+6 	virtual const char* getName() { return "A";}
+7 };
+8
+9 class B: public A
+10 {
+11 public:
+12 	virtual const char* getName() { return "B";}
+13 };
+14
+15 class C: public B
+16 {
+17 public:
+18 	//Примечание: Здесь нет метода getName()
+19 };
+20
+21 class D: public C
+22 {
+23 public:
+24 virtual const char* getName() { return "D";}
+25 };
+26
+27 int main()
+28 {
+29 C c;
+30 A &rParent = c;
+31 std::cout << rParent.getName()<< '\n';
+32
+33 return 0;
+34 }
+
+Мой ответ a)
+B
+
+Ответ a)
+Результат:
+
+B
+
+rParent — это ссылка класса A на объект c. rParent.getName() вызывает A::getName(), но, поскольку A::getName() является виртуальной 
+функцией, вызываться будет наиболее дочерний метод между классами A и C. А это B::getName(), так как в классе C метода getName() нет.
+
+
+b)
+
+1 #include <iostream>
+2
+3 class A
+4 {
+5 public:
+6 	virtual const char* getName() { return "A";}
+7 };
+8
+9 class B: public A
+10 {
+11 public:
+12 	virtual const char* getName() { return "B";}
+13 };
+14
+15 class C: public B
+16 {
+17 public:
+18 	virtual const char* getName() { return "C";}
+19 };
+20
+21 class D: public C
+22 {
+23 public:
+24 	virtual const char* getName() { return "D";}
+25 };
+26
+27 int main()
+28 {
+29 C c;
+30 B &rParent = c; // примечание: rParent на этот раз класса B
+31 std::cout << rParent.getName()<< '\n';
+32
+33 return 0;
+34 }
+
+Мой ответ b)
+С
+
+Ответ b)
+Результат:
+C
+Всё довольно просто, C::getName() — это наиболее дочерний метод между классами B и C.
+
+
+c)
+1 #include <iostream>
+2
+3 class A
+4 {
+5 public:
+6 	const char* getName() { return"A"; }// примечание: Нет ключевого слова virtual
+7 };
+8
+9 class B: public A
+10 {
+11 public:
+12 	virtual const char* getName() { return "B";}
+13 };
+14
+15 class C: publicB
+16 {
+17 public:
+18 	virtual const char* getName() { return "C";}
+19 };
+20
+21 class D: publicC
+22 {
+23 public:
+24 	virtual const char* getName() { return "D";}
+25 };
+26
+27 int main()
+28 {
+29 	C c;
+30 	A &rParent = c;
+31 	std::cout << rParent.getName()<< '\n';
+32
+33 	return 0;
+34 }
+
+Мой ответ c)
+A
+
+Ответ c)
+Результат:
+A
+Поскольку getName() класса A не является виртуальным методом, то при обработке rParent.getName() вызовется A::getName().
+
+
+
+d)
+1 #include <iostream>
+2
+3 class A
+4 {
+5 public:
+6 	virtual const char* getName() { return "A";}
+7 };
+8
+9 class B: public A
+10 {
+11 public:
+12 	const char *getName() { return "B"; } // примечание: Нет ключевого слова virtual
+13 };
+14 
+15 class C: public B
+16 {
+17 public:
+18 	const char *getName() { return"C"; } // примечание: Нетключевого слова virtual
+19 };
+20
+21 class D: public C
+22 {
+23 public:
+24 	const char *getName() { return"D"; }// примечание: Нетключевого слова virtual
+25 };
+26
+27 int main()
+28 {
+29 C c;
+30 B &rParent = c; // примечание: rParent на этот раз класса B
+31 std::cout << rParent.getName()<< '\n';
+32
+33 return 0;
+34 }
+
+Мой ответ d)
+B
+
+Ответ d)
+Результат:
+C
+Хотя B и C не являются виртуальными функциями, но A::getName() является виртуальной функцией, а B::getName() и C::getName() являются переопределениями. 
+Следовательно, B::getName() и C::getName() считаются неявно виртуальными, и поэтому вызов rParent.getName() вызовет C::getName().
+
+e)
+1 #include <iostream>
+2
+3 class A
+4 {
+5 public:
+6 	virtual const char* getName() const {return "A"; } // примечание: Метод является const
+7 };
+8
+9 class B: public A
+10 {
+11 public:
+12 	virtual const char* getName() { return "B";}
+13 };
+14
+15 class C: public B
+16 {
+17 public:
+18 	virtual const char* getName() { return "C";}
+19 };
+20
+21 class D: public C
+22 {
+23 public:
+24 	virtual const char* getName() { return "D";}
+25 };
+26
+27 int main()
+28 {
+29 C c;
+30 A &rParent = c;
+31 std::cout << rParent.getName()<< '\n';
+32
+33 return 0;
+34 }
+
+Мой Ответ e)
+C
+
+Ответ e)
+Результат:
+A
+Это уже несколько сложнее. rParent — это ссылка класса A на объект c, поэтому rParent.getName() вызывает A::getName(). 
+Но, поскольку A::getName() является виртуальной функцией, вызывается наиболее дочерний метод между A и C. И это A::getName(). 
+Поскольку B::getName() и С::getName() не являются const, то они не считаются переопределениями!
+
+
+
+f)
+
+1 #include <iostream>
+2
+3 class A
+4 {
+5 public:
+6 	A() {std::cout << getName(); } // обратите внимание на наличие конструктора
+7
+8 	virtual const char* getName() { return "A";}
+9 };
+10
+11 class B :public A
+12 {
+13 public:
+14 	virtual const char* getName() { return "B";}
+15 };
+16
+17 class C :public B
+18 {
+19 public:
+20 	virtual const char* getName() { return "C";}
+21 };
+22
+23 class D :public C
+24 {
+25 public:
+26 	virtual const char* getName() { return "D";}
+27 };
+28
+29 int main()
+30 {
+31 	C c;
+32
+33 return 0;
+34 }
+
+Мой ответ f)
+A
+
+Ответ f)
+Результат:
+А
+Еще одно хитрое задание. При создании объекта c, сначала выполняется построение родительской части A. 
+Для этого вызывается конструктор A, а он, в свою очередь, вызывает виртуальную функцию getName(). 
+Поскольку части классов B и C еще не созданы, то выполняется A::getName().
+
